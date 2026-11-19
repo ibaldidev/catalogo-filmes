@@ -64,7 +64,7 @@ Os scripts de página (`inicio.js`, `busca.js`, `filme.js`) não têm teste auto
 
 ---
 
-### Tarefa 1: Projeto, conta no TMDB e cliente do TMDB
+### Task 1 (Tarefa 1): Projeto, conta no TMDB e cliente do TMDB
 
 **Arquivos:**
 - Criar: `package.json`, `.gitignore`, `.env.example`, `.env`, `server/constantes.js`, `server/tmdb.js`, `scripts/testar-conexao.js`, `test/ajudantes.js`
@@ -115,7 +115,7 @@ test('falha de rede vira ErroTmdb com status 0', ...)   // fetchFn que lança Ty
 
 ---
 
-### Tarefa 2: Simplificar o JSON do TMDB
+### Task 2 (Tarefa 2): Simplificar o JSON do TMDB
 
 **Arquivos:**
 - Criar: `server/simplificar.js`
@@ -159,7 +159,7 @@ test('ordenarProvedores', ...)  // [{id:5,nome:'Zeta'},{id:119,…},{id:3,nome:'
 
 ---
 
-### Tarefa 3: Servidor Express com as rotas `/api`
+### Task 3 (Tarefa 3): Servidor Express com as rotas `/api`
 
 **Arquivos:**
 - Criar: `server/app.js`, `server/index.js`
@@ -207,7 +207,7 @@ test('provedores ordenados', ...)                    // /api/provedores → o pr
 
 ---
 
-### Tarefa 4: Funções de exibição no navegador
+### Task 4 (Tarefa 4): Funções de exibição no navegador
 
 **Arquivos:**
 - Criar: `public/js/formatar.js`, `public/js/componentes.js`
@@ -250,7 +250,7 @@ test('listaVazia escapa', ...)      // listaVazia('<i>') contém '&lt;i&gt;'
 
 ---
 
-### Tarefa 5: Página inicial, visual e rodapé
+### Task 5 (Tarefa 5): Página inicial, visual e rodapé
 
 **Arquivos:**
 - Criar: `public/index.html`, `public/css/estilo.css`, `public/img/tmdb-logo.svg`, `public/js/api.js`, `public/js/inicio.js`
@@ -283,7 +283,7 @@ test('listaVazia escapa', ...)      // listaVazia('<i>') contém '&lt;i&gt;'
 
 ---
 
-### Tarefa 6: Página do filme
+### Task 6 (Tarefa 6): Página do filme
 
 **Arquivos:**
 - Criar: `public/filme.html`, `public/js/filme.js`
@@ -324,7 +324,7 @@ test('resenha sem nota', ...)             // nota:null → não contém 'null'
 
 ---
 
-### Tarefa 7: Busca e README
+### Task 7 (Tarefa 7): Busca e README
 
 **Arquivos:**
 - Criar: `public/busca.html`, `public/js/busca.js`, `README.md`
