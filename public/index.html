@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Em Cartaz: o melhor do streaming hoje</title>
+  <meta name="description" content="Os filmes mais bem avaliados disponíveis agora nos serviços de streaming do Brasil.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@800;900&display=swap">
+  <link rel="stylesheet" href="css/estilo.css">
+  <script type="module" src="js/inicio.js"></script>
+</head>
+<body>
+  <header class="cabecalho">
+    <a class="marca" href="index.html">Em Cartaz</a>
+    <form class="busca" action="busca.html" role="search">
+      <label class="so-leitor" for="campo-busca">Buscar filme</label>
+      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme…" autocomplete="off">
+      <button type="submit">Buscar</button>
+    </form>
+  </header>
+
+  <main class="conteudo">
+    <h1 class="letreiro">O melhor do streaming hoje</h1>
+
+    <section class="controles" aria-label="Filtros">
+      <div class="ordem" role="group" aria-label="Ordenar por">
+        <button type="button" data-ordem="nota" aria-pressed="true">Mais bem avaliados</button>
+        <button type="button" data-ordem="populares" aria-pressed="false">Populares agora</button>
+      </div>
+
+      <div class="servicos" id="servicos" role="group" aria-label="Serviços de streaming"></div>
+      <button type="button" class="link-botao" id="ver-todos" hidden>Ver todos os serviços</button>
+    </section>
+
+    <div class="grade" id="grade" aria-live="polite"></div>
+    <button type="button" class="carregar-mais" id="carregar-mais" hidden>Carregar mais filmes</button>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape-interno">
+      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">
+        <img src="img/tmdb-logo.svg" alt="The Movie Database (TMDB)">
+      </a>
+      <p>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB. Dados de streaming: JustWatch.</p>
+    </div>
+  </footer>
+</body>
+</html>

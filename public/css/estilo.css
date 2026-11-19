@@ -1,0 +1,337 @@
+/* =========================================================
+   Em Cartaz: estilos do site
+   Ideia: a sala de cinema escura, com a luz âmbar do letreiro.
+   O CSS é "mobile-first": primeiro o celular, depois as telas
+   maiores, dentro de @media (min-width: ...).
+   ========================================================= */
+
+/* ---------- Cores, fontes e medidas (as "variáveis" do site) ---------- */
+:root {
+  --sala: #1a1530;          /* fundo: sala escura */
+  --poltrona: #251e42;      /* superfícies: um tom acima do fundo */
+  --cortina: #3a2f63;       /* bordas e divisórias */
+  --tela: #ece8f5;          /* texto principal */
+  --penumbra: #a79fc4;      /* texto secundário */
+  --letreiro: #f5b83d;      /* destaque: luz do letreiro */
+  --letreiro-escuro: #2b1d00; /* texto sobre o destaque */
+
+  --fonte-letreiro: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --fonte-texto: 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  --margem: 16px;
+  --largura-max: 1200px;
+  --raio: 6px;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--sala);
+  color: var(--tela);
+  font-family: var(--fonte-texto);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--letreiro);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Contorno visível para quem navega pelo teclado (Tab) */
+:focus-visible {
+  outline: 3px solid var(--letreiro);
+  outline-offset: 2px;
+}
+
+.conteudo {
+  width: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+  flex: 1;
+}
+
+/* ---------- Cabeçalho ---------- */
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 14px var(--margem);
+  width: 100%;
+}
+
+.marca {
+  font-family: var(--fonte-letreiro);
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  color: var(--letreiro);
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.busca {
+  display: flex;
+  flex: 1 1 220px;
+  max-width: 420px;
+}
+
+.busca input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--cortina);
+  border-right: 0;
+  border-radius: var(--raio) 0 0 var(--raio);
+  background: var(--poltrona);
+  color: var(--tela);
+  font: inherit;
+}
+
+.busca input::placeholder {
+  color: var(--penumbra);
+}
+
+.busca button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0 var(--raio) var(--raio) 0;
+  background: var(--letreiro);
+  color: var(--letreiro-escuro);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- Título-letreiro (o elemento marcante) ---------- */
+.letreiro {
+  font-family: var(--fonte-letreiro);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 11vw, 5.5rem);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  margin: 24px 0 20px;
+  color: var(--tela);
+  text-shadow: 0 0 28px rgba(245, 184, 61, 0.35); /* brilho de lâmpada */
+}
+
+/* ---------- Controles: ordem e serviços ---------- */
+.controles {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* Alternador "Mais bem avaliados | Populares agora" */
+.ordem {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--cortina);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.ordem button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--penumbra);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ordem button[aria-pressed='true'] {
+  background: var(--tela);
+  color: var(--sala);
+  font-weight: 700;
+}
+
+/* Botões de serviço de streaming */
+.servicos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border: 1px solid var(--cortina);
+  border-radius: 999px;
+  background: var(--poltrona);
+  color: var(--tela);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chip img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--letreiro);
+  box-shadow: inset 0 0 0 1px var(--letreiro);
+}
+
+.link-botao {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--letreiro);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Grade de filmes ---------- */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* celular: 2 colunas */
+  gap: 18px 14px;
+}
+
+.cartao {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cartao-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3; /* formato de pôster */
+  object-fit: cover;
+  border-radius: var(--raio);
+  background: var(--poltrona);
+}
+
+.sem-poster {
+  display: grid;
+  place-items: center;
+  color: var(--penumbra);
+  border: 1px dashed var(--cortina);
+}
+
+.cartao:hover .cartao-poster,
+.cartao:focus-visible .cartao-poster {
+  outline: 2px solid var(--letreiro);
+  outline-offset: 2px;
+}
+
+.cartao-titulo {
+  margin: 8px 0 2px;
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+
+.cartao-detalhes {
+  display: flex;
+  gap: 10px;
+  color: var(--penumbra);
+  font-size: 0.88rem;
+}
+
+.cartao-nota {
+  color: var(--letreiro);
+}
+
+/* Mensagens: carregando, vazio, erro */
+.vazio {
+  grid-column: 1 / -1;
+  color: var(--penumbra);
+  padding: 24px 0;
+}
+
+.carregar-mais {
+  display: block;
+  margin: 28px auto 40px;
+  padding: 12px 22px;
+  border: 1px solid var(--letreiro);
+  border-radius: var(--raio);
+  background: transparent;
+  color: var(--letreiro);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.carregar-mais:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* ---------- Rodapé com os créditos obrigatórios ---------- */
+.rodape {
+  margin-top: 48px;
+  border-top: 1px solid var(--cortina);
+  padding: 20px var(--margem) 28px;
+  color: var(--penumbra);
+  font-size: 0.85rem;
+}
+
+.rodape-interno {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.rodape img {
+  width: 120px;
+}
+
+.rodape p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* Esconde visualmente, mas mantém para leitores de tela */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Telas maiores ---------- */
+@media (min-width: 600px) {
+  .grade {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 24px 18px;
+  }
+}
+
+/* Respeita quem pediu menos animação no sistema */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
