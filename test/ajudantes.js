@@ -14,3 +14,17 @@ export function criarFetchFalso(resposta = {}, status = 200) {
   }
   return { fn, chamadas };
 }
+
+// Liga o app numa porta livre qualquer (porta 0 = "o sistema escolhe")
+// e devolve o endereço e uma função para desligar.
+export function iniciarServidor(app) {
+  return new Promise((resolver) => {
+    const servidor = app.listen(0, () => {
+      const { port } = servidor.address();
+      resolver({
+        url: `http://localhost:${port}`,
+        fechar: () => new Promise((fim) => servidor.close(fim)),
+      });
+    });
+  });
+}
