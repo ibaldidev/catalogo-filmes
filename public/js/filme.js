@@ -12,7 +12,7 @@ function paginaDoFilme(filme) {
   const poster = urlImagem(filme.poster, 'w500');
 
   const imagem = poster
-    ? `<img class="filme-poster" src="${poster}" alt="Pôster de ${titulo}">`
+    ? `<img class="filme-poster" src="${escaparHtml(poster)}" alt="Pôster de ${titulo}">`
     : '<div class="filme-poster sem-poster">Sem pôster</div>';
 
   // Só entram os detalhes que existem (nada de "null" na tela).
@@ -56,8 +56,18 @@ async function iniciar() {
     return;
   }
 
+  // 1) Buscar os dados. Se falhar, a mensagem vem do servidor (ex.: "Filme não encontrado.").
+  let filme;
   try {
-    const filme = await carregarFilme(id);
+    filme = await carregarFilme(id);
+  } catch (erro) {
+    area.innerHTML = listaVazia(erro.message);
+    return;
+  }
+
+  // 2) Montar a página. Se algo inesperado quebrar aqui, a pessoa vê uma mensagem
+  //    clara (e o detalhe técnico vai para o console, onde quem programa olha).
+  try {
     document.title = `${filme.titulo} | Em Cartaz`;
     area.innerHTML = paginaDoFilme(filme);
 
@@ -70,7 +80,8 @@ async function iniciar() {
       botao.remove();
     });
   } catch (erro) {
-    area.innerHTML = listaVazia(erro.message);
+    console.error(erro);
+    area.innerHTML = listaVazia('Não foi possível mostrar este filme. Tente recarregar a página.');
   }
 }
 

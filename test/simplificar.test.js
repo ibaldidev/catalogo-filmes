@@ -191,3 +191,9 @@ test('ordenarProvedores: principais primeiro, resto em ordem alfabética', () =>
 
   assert.deepEqual(ordenada.map((p) => p.id), [8, 119, 3, 4, 5]);
 });
+
+test('resenha sem texto vira texto vazio (e não quebra a página)', () => {
+  const resenha = simplificarResenha({ id: 'r9', author: 'Ana', content: null, created_at: 'd' }, 'en-US');
+
+  assert.equal(resenha.texto, '');
+});

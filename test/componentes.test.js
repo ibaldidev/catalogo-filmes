@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cartaoFilme, listaVazia, secaoOndeAssistir, cartaoResenha } from '../public/js/componentes.js';
+import { cartaoFilme, listaVazia, secaoOndeAssistir, cartaoResenha, chipServico } from '../public/js/componentes.js';
 
 const semNada = { disponivel: false, link: null, assinatura: [], gratis: [], anuncios: [], aluguel: [], compra: [] };
 
@@ -109,4 +109,41 @@ test('listaVazia escapa a mensagem', () => {
 
   assert.ok(html.includes('&lt;i&gt;nada'));
   assert.ok(!html.includes('<i>'));
+});
+
+test('nota da resenha usa vírgula', () => {
+  const html = cartaoResenha({ ...resenhaBase, nota: 7.5 });
+
+  assert.ok(html.includes('7,5/10'));
+  assert.ok(!html.includes('7.5'));
+});
+
+test('caminho de imagem com aspas não quebra o HTML', () => {
+  const caminho = '/a.jpg" onerror="alert(1)';
+  const cartao = cartaoFilme({ id: 1, titulo: 'X', ano: null, poster: caminho, nota: null, votos: 0 });
+  const onde = secaoOndeAssistir({ ...semNada, disponivel: true, assinatura: [{ id: 8, nome: 'N', logo: caminho }] });
+
+  for (const html of [cartao, onde]) {
+    assert.ok(!html.includes('" onerror="'));
+    assert.ok(html.includes('&quot; onerror=&quot;'));
+  }
+});
+
+test('chipServico: principal aparece, o resto começa escondido', () => {
+  const principal = chipServico({ id: 8, nome: 'Netflix', logo: '/n.jpg', principal: true });
+  const outro = chipServico({ id: 2, nome: 'Apple TV', logo: null, principal: false });
+
+  assert.ok(principal.includes('data-provedor="8"'));
+  assert.ok(principal.includes('https://image.tmdb.org/t/p/w92/n.jpg'));
+  assert.ok(!principal.includes('hidden'));
+  assert.ok(outro.includes('hidden'));
+  assert.ok(!outro.includes('null'));
+});
+
+test('chipServico escapa nome e logo', () => {
+  const html = chipServico({ id: 1, nome: '<b>X</b>', logo: '/a.jpg" onerror="x', principal: true });
+
+  assert.ok(html.includes('&lt;b&gt;X'));
+  assert.ok(!html.includes('<b>'));
+  assert.ok(!html.includes('" onerror="'));
 });

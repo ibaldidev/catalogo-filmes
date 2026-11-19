@@ -1,5 +1,6 @@
 // Funções puras que montam pedaços de HTML (como texto) a partir dos dados.
-// Todo texto que vem do TMDB passa por escaparHtml antes de entrar no HTML.
+// Todo texto que vem do TMDB (inclusive os endereços de imagem) passa por
+// escaparHtml antes de entrar no HTML.
 
 import { escaparHtml, urlImagem, formatarNota, cortarTexto } from './formatar.js';
 
@@ -21,7 +22,7 @@ export function cartaoFilme(filme) {
   const poster = urlImagem(filme.poster);
 
   const imagem = poster
-    ? `<img class="cartao-poster" src="${poster}" alt="Pôster de ${titulo}" loading="lazy">`
+    ? `<img class="cartao-poster" src="${escaparHtml(poster)}" alt="Pôster de ${titulo}" loading="lazy">`
     : `<div class="cartao-poster sem-poster">Sem pôster</div>`;
 
   const ano = filme.ano ? `<span class="cartao-ano">${filme.ano}</span>` : '';
@@ -52,7 +53,7 @@ export function secaoOndeAssistir(onde) {
     .map(([chave, titulo]) => {
       const itens = onde[chave].map((p) => {
         const logo = urlImagem(p.logo, 'w92');
-        return `<li class="provedor">${logo ? `<img src="${logo}" alt="" loading="lazy">` : ''}${escaparHtml(p.nome)}</li>`;
+        return `<li class="provedor">${logo ? `<img src="${escaparHtml(logo)}" alt="" loading="lazy">` : ''}${escaparHtml(p.nome)}</li>`;
       });
       return `<div class="grupo"><h3>${titulo}</h3><ul>${itens.join('')}</ul></div>`;
     });
@@ -78,7 +79,7 @@ export function cartaoResenha(resenha) {
 
   const detalhes = [
     data ? `<span>${data}</span>` : '',
-    resenha.nota !== null ? `<span class="resenha-nota">★ ${escaparHtml(resenha.nota)}/10</span>` : '',
+    resenha.nota !== null ? `<span class="resenha-nota">★ ${escaparHtml(String(resenha.nota).replace('.', ','))}/10</span>` : '',
     resenha.idioma === 'en-US' ? '<span class="etiqueta">Em inglês</span>' : '',
   ].join('');
 
@@ -95,6 +96,18 @@ export function cartaoResenha(resenha) {
       <p class="resenha-texto">${escaparHtml(curto)}</p>
       ${botao}
     </article>`;
+}
+
+// Botão de um serviço de streaming (página inicial).
+// Só os serviços principais aparecem de início; os outros ficam escondidos
+// até a pessoa clicar em "Ver todos os serviços".
+export function chipServico(provedor) {
+  const logo = urlImagem(provedor.logo, 'w92');
+  return `
+    <button type="button" class="chip" data-provedor="${escaparHtml(provedor.id)}" aria-pressed="false" ${provedor.principal ? '' : 'hidden'}>
+      ${logo ? `<img src="${escaparHtml(logo)}" alt="" loading="lazy">` : ''}
+      ${escaparHtml(provedor.nome)}
+    </button>`;
 }
 
 // Mensagem para quando não há nada a mostrar (ou deu erro).

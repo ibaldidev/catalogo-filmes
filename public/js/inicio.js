@@ -1,10 +1,7 @@
 // Página inicial: liga os botões da tela às funções que buscam e mostram os filmes.
 
 import { carregarProvedores, descobrir } from './api.js';
-import { cartaoFilme, listaVazia } from './componentes.js';
-import { escaparHtml, urlImagem } from './formatar.js';
-
-const QUANTOS_PRINCIPAIS = 7; // o servidor já manda os 7 principais na frente
+import { cartaoFilme, chipServico, listaVazia } from './componentes.js';
 
 // Elementos da página
 const grade = document.querySelector('#grade');
@@ -69,23 +66,12 @@ function recomecar() {
   carregarFilmes({ acrescentar: false });
 }
 
-// Monta um botão de serviço de streaming.
-function chipServico(provedor, escondido) {
-  const logo = urlImagem(provedor.logo, 'w92');
-  return `
-    <button type="button" class="chip" data-provedor="${provedor.id}" aria-pressed="false" ${escondido ? 'hidden' : ''}>
-      ${logo ? `<img src="${logo}" alt="" loading="lazy">` : ''}
-      ${escaparHtml(provedor.nome)}
-    </button>`;
-}
-
 async function mostrarServicos() {
   try {
     const provedores = await carregarProvedores();
-    areaServicos.innerHTML = provedores
-      .map((p, posicao) => chipServico(p, posicao >= QUANTOS_PRINCIPAIS))
-      .join('');
-    botaoVerTodos.hidden = provedores.length <= QUANTOS_PRINCIPAIS;
+    areaServicos.innerHTML = provedores.map(chipServico).join('');
+    // O servidor marca quais são "principais"; os outros começam escondidos.
+    botaoVerTodos.hidden = provedores.every((p) => p.principal);
   } catch {
     // Sem a lista de serviços, a página continua funcionando, só sem o filtro.
   }

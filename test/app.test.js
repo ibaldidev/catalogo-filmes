@@ -141,12 +141,34 @@ test('token inválido também vira 502', async () => {
   assert.equal(status, 502);
 });
 
-test('provedores ordenados com os principais primeiro', async () => {
+test('provedores ordenados com os principais primeiro e marcados', async () => {
   const { status, corpo } = await pedir('/api/provedores');
 
   assert.equal(status, 200);
   assert.deepEqual(corpo, [
-    { id: 8, nome: 'Netflix', logo: '/n.jpg' },
-    { id: 2, nome: 'Apple TV', logo: '/a.jpg' },
+    { id: 8, nome: 'Netflix', logo: '/n.jpg', principal: true },
+    { id: 2, nome: 'Apple TV', logo: '/a.jpg', principal: false },
   ]);
+});
+
+test('endereço com caractere inválido é 400 e não culpa o TMDB', async () => {
+  const { status, corpo, tmdb } = await pedir('/api/filme/%E0');
+
+  assert.equal(status, 400);
+  assert.deepEqual(corpo, { erro: 'Endereço inválido.' });
+  assert.equal(tmdb.chamadas.length, 0);
+});
+
+test('erro no nosso próprio código é 500 e não culpa o TMDB', async () => {
+  const { status, corpo } = await pedir('/api/filme/550', criarTmdbFalso({ detalhes: new TypeError('bug nosso') }));
+
+  assert.equal(status, 500);
+  assert.deepEqual(corpo, { erro: 'Algo deu errado no servidor. Tente de novo em instantes.' });
+});
+
+test('rota /api que não existe responde 404 em JSON', async () => {
+  const { status, corpo } = await pedir('/api/nada');
+
+  assert.equal(status, 404);
+  assert.deepEqual(corpo, { erro: 'Endereço não encontrado.' });
 });

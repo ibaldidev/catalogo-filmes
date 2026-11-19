@@ -50,7 +50,7 @@ export function simplificarResenha(raw, idioma) {
   return {
     id: raw.id,
     autor: raw.author,
-    texto: raw.content,
+    texto: raw.content ?? '', // sem texto, a página mostra a resenha vazia em vez de quebrar
     idioma,
     nota: raw.author_details?.rating ?? null,
     data: raw.created_at,
