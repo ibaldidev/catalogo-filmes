@@ -23,7 +23,8 @@ export function limitarPagina(valor) {
 }
 
 // fetchFn permite que os testes troquem o fetch de verdade por um falso.
-export function criarClienteTmdb({ token, fetchFn = fetch }) {
+// tempoLimiteMs: se o TMDB não responder nesse tempo, desistimos (em vez de esperar minutos).
+export function criarClienteTmdb({ token, fetchFn = fetch, tempoLimiteMs = 10000 }) {
   // Faz um pedido GET ao TMDB e devolve o JSON da resposta.
   async function get(caminho, parametros = {}) {
     const url = new URL(URL_BASE + caminho);
@@ -35,6 +36,7 @@ export function criarClienteTmdb({ token, fetchFn = fetch }) {
     try {
       resposta = await fetchFn(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        signal: AbortSignal.timeout(tempoLimiteMs), // cancela o pedido quando o tempo acaba
       });
     } catch (erro) {
       throw new ErroTmdb(0, `Não foi possível conectar ao TMDB: ${erro.message}`);

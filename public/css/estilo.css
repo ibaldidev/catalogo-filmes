@@ -51,6 +51,13 @@ img {
   display: block;
 }
 
+/* O atributo hidden sempre esconde, mesmo quando uma classe define "display".
+   Sem esta regra, ".chip { display: inline-flex }" venceria o hidden do navegador,
+   porque uma regra nossa com classe tem prioridade sobre a regra padrão dele. */
+[hidden] {
+  display: none !important;
+}
+
 /* Contorno visível para quem navega pelo teclado (Tab) */
 :focus-visible {
   outline: 3px solid var(--letreiro);

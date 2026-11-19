@@ -115,6 +115,20 @@ test('resposta de erro vira ErroTmdb com status', async () => {
   });
 });
 
+test('TMDB que não responde vira ErroTmdb com status 0 depois do tempo limite', { timeout: 2000 }, async () => {
+  // fetch que nunca responde: só termina se o pedido for cancelado (signal).
+  const fetchTravado = (url, opcoes) => new Promise((_, rejeitar) => {
+    opcoes.signal?.addEventListener('abort', () => rejeitar(opcoes.signal.reason));
+  });
+  const cliente = criarClienteTmdb({ token: 'TOKEN-TESTE', fetchFn: fetchTravado, tempoLimiteMs: 50 });
+
+  await assert.rejects(cliente.provedores(), (erro) => {
+    assert.ok(erro instanceof ErroTmdb);
+    assert.equal(erro.status, 0);
+    return true;
+  });
+});
+
 test('falha de rede vira ErroTmdb com status 0', async () => {
   const fetchQueFalha = async () => { throw new TypeError('fetch failed'); };
   const cliente = criarClienteTmdb({ token: 'TOKEN-TESTE', fetchFn: fetchQueFalha });
