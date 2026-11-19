@@ -1,0 +1,8 @@
+# Bibliotecas baixadas pelo npm (dá para recriar com "npm install")
+node_modules/
+
+# Segredos: o token do TMDB fica só no seu computador
+.env
+
+# Arquivos temporários do processo de construção
+.superpowers/
