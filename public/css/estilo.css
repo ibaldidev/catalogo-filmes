@@ -283,6 +283,157 @@ img {
   cursor: wait;
 }
 
+/* ---------- Página do filme ---------- */
+.filme-topo {
+  display: grid;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.filme-poster {
+  width: min(260px, 70%);
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--raio);
+  background: var(--poltrona);
+}
+
+.filme-titulo {
+  font-family: var(--fonte-letreiro);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 9vw, 4rem);
+  line-height: 0.95;
+  margin: 0 0 12px;
+}
+
+.filme-detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  color: var(--penumbra);
+}
+
+.filme-nota {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--letreiro);
+  margin: 14px 0;
+}
+
+.votos {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--penumbra);
+}
+
+.filme-sinopse {
+  max-width: 65ch;
+  margin: 0;
+}
+
+.secao {
+  margin-top: 40px;
+}
+
+.secao h2 {
+  font-family: var(--fonte-letreiro);
+  font-weight: 800;
+  font-size: 2rem;
+  margin: 0 0 16px;
+  color: var(--letreiro);
+}
+
+/* Onde assistir */
+.grupo h3 {
+  font-size: 1rem;
+  margin: 16px 0 8px;
+}
+
+.grupo ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.provedor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border: 1px solid var(--cortina);
+  border-radius: 999px;
+  background: var(--poltrona);
+  font-size: 0.9rem;
+}
+
+.provedor img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.indisponivel {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 3px solid var(--letreiro);
+  background: var(--poltrona);
+}
+
+.credito {
+  margin: 16px 0 4px;
+  color: var(--penumbra);
+  font-size: 0.85rem;
+}
+
+/* Resenhas */
+.resenhas {
+  display: grid;
+  gap: 16px;
+}
+
+.resenha {
+  padding: 16px;
+  border-radius: var(--raio);
+  background: var(--poltrona);
+  max-width: 75ch;
+}
+
+.resenha-autor {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.resenha-detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--penumbra);
+  font-size: 0.85rem;
+}
+
+.resenha-nota {
+  color: var(--letreiro);
+}
+
+.etiqueta {
+  padding: 0 8px;
+  border: 1px solid var(--cortina);
+  border-radius: 999px;
+}
+
+.resenha-texto {
+  white-space: pre-line; /* mantém os parágrafos da resenha */
+  overflow-wrap: anywhere; /* links longos não estouram a tela do celular */
+  margin: 10px 0 0;
+}
+
+.resenha .link-botao {
+  margin-top: 8px;
+}
+
 /* ---------- Rodapé com os créditos obrigatórios ---------- */
 .rodape {
   margin-top: 48px;
@@ -325,6 +476,17 @@ img {
   .grade {
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 24px 18px;
+  }
+
+  /* Página do filme: pôster à esquerda, informações à direita */
+  .filme-topo {
+    grid-template-columns: 260px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .filme-poster {
+    width: 100%;
   }
 }
 
