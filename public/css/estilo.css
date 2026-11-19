@@ -283,6 +283,16 @@ img {
   cursor: wait;
 }
 
+/* ---------- Página de busca ---------- */
+.titulo-busca {
+  font-family: var(--fonte-letreiro);
+  font-weight: 800;
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  line-height: 1;
+  margin: 24px 0 20px;
+  overflow-wrap: anywhere; /* buscas longas não estouram a tela */
+}
+
 /* ---------- Página do filme ---------- */
 .filme-topo {
   display: grid;
