@@ -147,3 +147,18 @@ test('chipServico escapa nome e logo', () => {
   assert.ok(!html.includes('<b>'));
   assert.ok(!html.includes('" onerror="'));
 });
+
+test('resenha em inglês tem botão de traduzir e aviso, os dois escondidos', () => {
+  const html = cartaoResenha({ ...resenhaBase, idioma: 'en-US' });
+
+  assert.match(html, /<button[^>]*data-traduzir="r1"[^>]*hidden[^>]*>Traduzir para o português<\/button>/);
+  assert.match(html, /<p class="resenha-aviso" hidden>Traduzido pelo navegador<\/p>/);
+  assert.ok(html.includes('class="resenha-acoes"'));
+});
+
+test('resenha em português não tem botão de traduzir', () => {
+  const html = cartaoResenha(resenhaBase);
+
+  assert.ok(!html.includes('data-traduzir'));
+  assert.ok(!html.includes('Traduzido pelo navegador'));
+});

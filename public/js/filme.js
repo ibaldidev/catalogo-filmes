@@ -3,8 +3,13 @@
 import { carregarFilme } from './api.js';
 import { secaoOndeAssistir, cartaoResenha, listaVazia } from './componentes.js';
 import { escaparHtml, urlImagem, formatarNota, formatarDuracao } from './formatar.js';
+import { tradutorDisponivel, criarTradutor, traduzirTexto } from './traducao.js';
 
 const area = document.querySelector('#filme');
+
+// Um único tradutor para a página inteira, criado só no primeiro clique em "Traduzir".
+let tradutorPromessa = null;
+const traducoes = new Map(); // id da resenha → texto traduzido (para não traduzir duas vezes)
 
 // Monta o HTML da página inteira a partir dos dados do filme.
 function paginaDoFilme(filme) {
@@ -49,6 +54,57 @@ function paginaDoFilme(filme) {
     </section>`;
 }
 
+// "Ler mais": troca o trecho pelo texto completo.
+function mostrarTextoCompleto(botao, filme) {
+  const resenha = filme.resenhas.find((r) => r.id === botao.dataset.resenhaId);
+  // textContent nunca vira HTML. (Depois de traduzir, este botão já não existe.)
+  botao.closest('.resenha').querySelector('.resenha-texto').textContent = resenha.texto;
+  botao.remove();
+}
+
+// "Traduzir para o português" ↔ "Ver original".
+async function alternarTraducao(botao, filme) {
+  const cartao = botao.closest('.resenha');
+  const paragrafo = cartao.querySelector('.resenha-texto');
+  const aviso = cartao.querySelector('.resenha-aviso');
+  const resenha = filme.resenhas.find((r) => r.id === botao.dataset.traduzir);
+
+  // A tradução e o original sempre aparecem inteiros, então o "Ler mais" deixa de ser útil.
+  cartao.querySelector('[data-resenha-id]')?.remove();
+
+  // Já está traduzida: volta para o original.
+  if (cartao.dataset.traduzida === 'sim') {
+    paragrafo.textContent = resenha.texto;
+    aviso.hidden = true;
+    cartao.dataset.traduzida = 'não';
+    botao.textContent = 'Traduzir para o português';
+    return;
+  }
+
+  botao.disabled = true;
+  botao.textContent = 'Traduzindo…';
+  try {
+    if (!traducoes.has(resenha.id)) {
+      tradutorPromessa ??= criarTradutor(globalThis, (fracao) => {
+        botao.textContent = `Baixando tradutor… ${Math.round(fracao * 100)}%`;
+      });
+      const tradutor = await tradutorPromessa;
+      botao.textContent = 'Traduzindo…';
+      traducoes.set(resenha.id, await traduzirTexto(resenha.texto, (trecho) => tradutor.translate(trecho)));
+    }
+    paragrafo.textContent = traducoes.get(resenha.id);
+    aviso.hidden = false;
+    cartao.dataset.traduzida = 'sim';
+    botao.textContent = 'Ver original';
+  } catch (erro) {
+    console.error(erro);
+    tradutorPromessa = null; // na próxima tentativa, cria o tradutor de novo
+    botao.textContent = 'Não foi possível traduzir agora. Tentar de novo';
+  } finally {
+    botao.disabled = false;
+  }
+}
+
 async function iniciar() {
   const id = new URLSearchParams(location.search).get('id');
   if (!id) {
@@ -71,14 +127,20 @@ async function iniciar() {
     document.title = `${filme.titulo} | Em Cartaz`;
     area.innerHTML = paginaDoFilme(filme);
 
-    // "Ler mais": um único ouvinte para todos os botões das resenhas.
-    document.querySelector('#resenhas').addEventListener('click', (evento) => {
-      const botao = evento.target.closest('[data-resenha-id]');
-      if (!botao) return;
-      const resenha = filme.resenhas.find((r) => r.id === botao.dataset.resenhaId);
-      botao.previousElementSibling.textContent = resenha.texto; // textContent nunca vira HTML
-      botao.remove();
+    // Um único ouvinte para todos os botões das resenhas ("Ler mais" e "Traduzir").
+    const areaResenhas = document.querySelector('#resenhas');
+    areaResenhas.addEventListener('click', (evento) => {
+      const lerMais = evento.target.closest('[data-resenha-id]');
+      if (lerMais) mostrarTextoCompleto(lerMais, filme);
+
+      const traduzir = evento.target.closest('[data-traduzir]');
+      if (traduzir) alternarTraducao(traduzir, filme);
     });
+
+    // Só mostra os botões de traduzir se o navegador tiver o tradutor embutido.
+    if (await tradutorDisponivel()) {
+      for (const botao of areaResenhas.querySelectorAll('[data-traduzir]')) botao.hidden = false;
+    }
   } catch (erro) {
     console.error(erro);
     area.innerHTML = listaVazia('Não foi possível mostrar este filme. Tente recarregar a página.');

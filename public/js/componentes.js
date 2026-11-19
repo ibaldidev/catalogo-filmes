@@ -83,9 +83,20 @@ export function cartaoResenha(resenha) {
     resenha.idioma === 'en-US' ? '<span class="etiqueta">Em inglês</span>' : '',
   ].join('');
 
-  const botao = cortado
-    ? `<button type="button" class="link-botao" data-resenha-id="${escaparHtml(resenha.id)}">Ler mais</button>`
+  const id = escaparHtml(resenha.id);
+  const lerMais = cortado
+    ? `<button type="button" class="link-botao" data-resenha-id="${id}">Ler mais</button>`
     : '';
+
+  // Resenhas em inglês ganham o botão de traduzir. Ele começa escondido:
+  // a página só mostra se o navegador tiver o tradutor embutido.
+  const emIngles = resenha.idioma === 'en-US';
+  const traduzir = emIngles
+    ? `<button type="button" class="link-botao" data-traduzir="${id}" hidden>Traduzir para o português</button>`
+    : '';
+  const aviso = emIngles ? '<p class="resenha-aviso" hidden>Traduzido pelo navegador</p>' : '';
+
+  const acoes = lerMais || traduzir ? `<div class="resenha-acoes">${lerMais}${traduzir}</div>` : '';
 
   return `
     <article class="resenha">
@@ -94,7 +105,8 @@ export function cartaoResenha(resenha) {
         <div class="resenha-detalhes">${detalhes}</div>
       </header>
       <p class="resenha-texto">${escaparHtml(curto)}</p>
-      ${botao}
+      ${aviso}
+      ${acoes}
     </article>`;
 }
 

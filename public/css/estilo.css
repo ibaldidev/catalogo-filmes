@@ -447,8 +447,23 @@ img {
   margin: 10px 0 0;
 }
 
-.resenha .link-botao {
+.resenha-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
   margin-top: 8px;
+}
+
+.resenha-aviso {
+  margin: 8px 0 0;
+  color: var(--penumbra);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.link-botao:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 /* ---------- Rodapé com os créditos obrigatórios ---------- */
