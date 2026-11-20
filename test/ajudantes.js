@@ -34,7 +34,8 @@ export function iniciarServidor(app) {
 // semLogin() devolve um navegador de visitante. relogio.agora pode ser avançado pelo teste.
 export async function ligarComunidade({ criarApp, abrirBanco, tmdb = {} }) {
   const relogio = { agora: 1_700_000_000_000 };
-  const servidor = await iniciarServidor(criarApp({ tmdb, db: abrirBanco(), agora: () => relogio.agora }));
+  const db = abrirBanco();
+  const servidor = await iniciarServidor(criarApp({ tmdb, db, agora: () => relogio.agora }));
 
   async function novoUsuario(nome) {
     const navegador = criarNavegador(servidor.url);
@@ -46,7 +47,7 @@ export async function ligarComunidade({ criarApp, abrirBanco, tmdb = {} }) {
     return navegador;
   }
 
-  return { relogio, novoUsuario, semLogin: () => criarNavegador(servidor.url), fechar: servidor.fechar };
+  return { db, relogio, novoUsuario, semLogin: () => criarNavegador(servidor.url), fechar: servidor.fechar };
 }
 
 // "Navegador de mentira" para os testes: faz pedidos ao servidor e, como um navegador

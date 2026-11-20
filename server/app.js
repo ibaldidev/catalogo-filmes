@@ -140,6 +140,27 @@ export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
     res.status(204).end();
   });
 
+  // ---------- Discussão (com spoilers) ----------
+  // Esta é a ÚNICA rota que devolve comentários. A página só a chama depois do
+  // clique em "Já assisti, quero ver": antes disso, os spoilers nem chegam ao navegador.
+
+  app.get('/api/filme/:id/comentarios', (req, res) => {
+    res.json(comunidade.comentariosDoFilme(lerIdFilme(req), req.usuario?.id ?? null));
+  });
+
+  app.post('/api/filme/:id/comentarios', (req, res) => {
+    const filmeId = lerIdFilme(req);
+    const usuario = exigirLogin(req);
+    res.status(201).json(comunidade.comentar(usuario.id, filmeId, req.body));
+  });
+
+  app.delete('/api/comentarios/:id', (req, res) => {
+    const usuario = exigirLogin(req);
+    if (!ID_VALIDO.test(req.params.id)) throw new ErroPedido(404, 'Comentário não encontrado.');
+    comunidade.apagarComentario(usuario.id, Number(req.params.id));
+    res.status(204).end();
+  });
+
   // ---------- Catálogo (fase 1) ----------
 
   // Lista de serviços de streaming do Brasil.
