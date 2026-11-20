@@ -106,3 +106,13 @@ test('sair invalida a sessão; token vazio ou inventado não é ninguém', () =>
   assert.equal(contas.usuarioDaSessao(undefined), null);
   assert.equal(contas.usuarioDaSessao('inventado'), null);
 });
+
+test('nome com caracteres invisíveis ou de controle é recusado', () => {
+  const { contas } = preparar();
+  contas.cadastrar(ana);
+
+  for (const nome of ['\u200b\u200b', 'Ana\u200b', 'A\u200bna', 'a\nb', 'Ana\u0007', 'Ana\u202e']) {
+    lancaErro(() => contas.cadastrar({ ...ana, email: 'outra@x.com', nome }), 400, 'O nome tem caracteres que não são permitidos.');
+  }
+  assert.equal(contas.cadastrar({ ...ana, email: 'outra@x.com', nome: 'Ana Júlia 2' }).nome, 'Ana Júlia 2');
+});

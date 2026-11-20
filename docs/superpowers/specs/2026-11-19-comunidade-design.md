@@ -175,6 +175,7 @@ Elas também escrevem e respondem. Por enquanto, quem usa o site são as pessoas
 ## 13. Antes de ir para a internet (fica registrado, não é desta fase)
 - Uma hospedagem que guarde o arquivo do banco, ou a troca para um banco hospedado.
 - Um limite de tentativas de login, contra quem tenta adivinhar senhas.
+- Não revelar quais e-mails têm conta. Hoje o cadastro responde "Este e-mail já tem conta", e o login com e-mail existente demora mais, porque confere a senha. Na internet, o ideal é confirmar por e-mail e conferir um hash falso quando o e-mail não existe.
 - Denunciar conteúdo e moderação.
 - Envio de e-mail, para a confirmação e o "esqueci minha senha".
 - Uma página de privacidade e a opção "apagar minha conta", exigidas pela LGPD.

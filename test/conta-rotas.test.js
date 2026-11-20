@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { criarApp } from '../server/app.js';
 import { abrirBanco } from '../server/banco.js';
-import { iniciarServidor, criarNavegador } from './ajudantes.js';
+import { iniciarServidor, criarNavegador, ligarComunidade } from './ajudantes.js';
 
 const ana = { email: 'ana@x.com', senha: 'senha-da-ana', nome: 'Ana' };
 
@@ -111,3 +111,42 @@ test('respostas nunca contêm senha nem hash', () => comServidor(async (navegado
     assert.ok(!texto.includes('scrypt$'));
   }
 }));
+
+test('catálogo continua funcionando mesmo se o banco falhar', async () => {
+  const db = abrirBanco();
+  const tmdb = { provedores: async () => ({ results: [] }) };
+  const servidor = await iniciarServidor(criarApp({ tmdb, db }));
+  db.close(); // simula o banco quebrado
+  try {
+    const navegador = criarNavegador(servidor.url);
+    navegador.cookie = 'sessao=qualquer'; // com cookie, o servidor tenta consultar a sessão no banco
+    const { status } = await navegador.pedir('/api/provedores');
+    assert.equal(status, 200);
+  } finally {
+    await servidor.fechar();
+  }
+});
+
+test('escrita com crachá inventado, depois de sair ou vencido é 401', async () => {
+  const comunidade = await ligarComunidade({ criarApp, abrirBanco });
+  const avaliar = (navegador) => navegador.pedir('/api/filme/550/avaliacao', { metodo: 'PUT', corpo: { nota: 8 } });
+  try {
+    const inventado = comunidade.semLogin();
+    inventado.cookie = 'sessao=inventado';
+    assert.equal((await avaliar(inventado)).status, 401, 'inventado');
+
+    const ana = await comunidade.novoUsuario('Ana');
+    const cookieDaAna = ana.cookie;
+    await ana.pedir('/api/conta/sair', { metodo: 'POST', corpo: {} });
+    ana.cookie = cookieDaAna;
+    assert.equal((await avaliar(ana)).status, 401, 'depois de sair');
+
+    const bia = await comunidade.novoUsuario('Bia');
+    comunidade.relogio.agora += 30 * 24 * 60 * 60 * 1000 + 1;
+    const vencido = await avaliar(bia);
+    assert.equal(vencido.status, 401, 'vencido');
+    assert.deepEqual(vencido.corpo, { erro: 'Entre na sua conta para continuar.' });
+  } finally {
+    await comunidade.fechar();
+  }
+});

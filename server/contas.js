@@ -43,6 +43,11 @@ export function criarContas(db, { agora = Date.now } = {}) {
     if (nomeLimpo.length < 2 || nomeLimpo.length > 30) {
       throw new ErroPedido(400, 'O nome precisa ter de 2 a 30 caracteres.');
     }
+    // \p{C} = caracteres "de controle" e invisíveis (ex.: espaço de largura zero).
+    // Sem esta regra, "Ana" + um caractere invisível pareceria a Ana na tela.
+    if (/\p{C}/u.test(nomeLimpo)) {
+      throw new ErroPedido(400, 'O nome tem caracteres que não são permitidos.');
+    }
     if (sql.porEmail.get(emailLimpo)) throw new ErroPedido(400, 'Este e-mail já tem conta. Tente entrar.');
     if (sql.porNome.get(nomeLimpo)) throw new ErroPedido(400, 'Este nome já está em uso. Escolha outro.');
 

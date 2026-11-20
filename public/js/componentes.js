@@ -67,10 +67,13 @@ export function secaoOndeAssistir(onde) {
 }
 
 // "2020-01-15T12:00:00Z" → "15/01/2020" (ou '' se a data for inválida)
-function formatarData(texto) {
+// As resenhas do TMDB usam a data em UTC (como na fase 1). Na comunidade, a data é
+// o momento em que alguém escreveu: mostramos no fuso de quem lê ({ utc: false }),
+// senão um comentário das 22h no Brasil apareceria com a data do dia seguinte.
+function formatarData(texto, { utc = true } = {}) {
   const data = new Date(texto);
   if (Number.isNaN(data.getTime())) return '';
-  return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  return data.toLocaleDateString('pt-BR', utc ? { timeZone: 'UTC' } : {});
 }
 
 // Uma resenha. Se o texto for longo, mostra só o começo e um botão "Ler mais".
@@ -144,7 +147,7 @@ export function notaComunidade({ media, total }) {
 
 // Uma avaliação da comunidade. A da própria pessoa ganha "Editar" e "Apagar".
 export function cartaoAvaliacao(avaliacao, { minha = false } = {}) {
-  const data = formatarData(avaliacao.criadoEm);
+  const data = formatarData(avaliacao.criadoEm, { utc: false });
   const detalhes = [
     data ? `<span>${data}</span>` : '',
     `<span class="resenha-nota">★ ${escaparHtml(avaliacao.nota)}/10</span>`,
@@ -222,7 +225,7 @@ function acoesComentario({ id, autor, meu }, podeResponder) {
 function cartaoResposta(resposta, podeResponder) {
   return `
     <div class="resposta">
-      <p class="comentario-topo"><strong>${escaparHtml(resposta.autor)}</strong> <span class="dica">${formatarData(resposta.criadoEm)}</span></p>
+      <p class="comentario-topo"><strong>${escaparHtml(resposta.autor)}</strong> <span class="dica">${formatarData(resposta.criadoEm, { utc: false })}</span></p>
       <p class="resenha-texto">${escaparHtml(resposta.texto)}</p>
       ${acoesComentario(resposta, podeResponder)}
     </div>`;
@@ -235,7 +238,7 @@ export function cartaoComentario(comentario, { logado = false } = {}) {
   const corpo = comentario.apagado
     ? '<p class="comentario-apagado">Comentário apagado</p>'
     : `
-      <p class="comentario-topo"><strong>${escaparHtml(comentario.autor)}</strong> <span class="dica">${formatarData(comentario.criadoEm)}</span></p>
+      <p class="comentario-topo"><strong>${escaparHtml(comentario.autor)}</strong> <span class="dica">${formatarData(comentario.criadoEm, { utc: false })}</span></p>
       <p class="resenha-texto">${escaparHtml(comentario.texto)}</p>
       ${acoesComentario(comentario, podeResponder)}`;
   const respostas = comentario.respostas.length > 0

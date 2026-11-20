@@ -292,3 +292,13 @@ test('pedirLogin usa linkEntrar com o destino', () => {
   assert.ok(html.includes('href="entrar.html?volta=filme.html%3Fid%3D550"'));
   assert.ok(html.includes('>Entre para avaliar<'));
 });
+
+test('datas da comunidade usam o fuso de quem lê (não UTC)', () => {
+  process.env.TZ = 'America/Sao_Paulo';
+  const noite = '2026-11-21T01:00:00.000Z'; // em Brasília: 20/11 às 22h
+
+  const comentario = cartaoComentario({ ...comentarioBase, criadoEm: noite, respostas: [{ ...resposta, criadoEm: noite }] });
+  assert.equal(comentario.match(/20\/11\/2026/g)?.length, 2);
+  assert.ok(!comentario.includes('21/11/2026'));
+  assert.ok(cartaoAvaliacao({ ...avaliacaoBase, criadoEm: noite }).includes('20/11/2026'));
+});

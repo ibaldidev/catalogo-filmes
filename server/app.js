@@ -89,7 +89,13 @@ export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
   //    Depois daqui, toda rota sabe: req.usuario é o usuário, ou null se não entrou.
   app.use('/api', (req, res, next) => {
     req.token = lerCookies(req.headers.cookie).sessao;
-    req.usuario = contas.usuarioDaSessao(req.token);
+    try {
+      req.usuario = contas.usuarioDaSessao(req.token);
+    } catch (erro) {
+      // Banco com problema: a pessoa vira visitante, mas o catálogo (fase 1) continua no ar.
+      console.error(erro);
+      req.usuario = null;
+    }
     next();
   });
 
