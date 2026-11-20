@@ -1,6 +1,8 @@
 // Página do filme: lê o id da URL (filme.html?id=550), busca os dados e monta a página.
 
-import { carregarFilme } from './api.js';
+import { carregarFilme, carregarAvaliacoes } from './api.js';
+import { usuarioAtual } from './cabecalho.js';
+import { iniciarComunidade } from './comunidade.js';
 import { secaoOndeAssistir, cartaoResenha, listaVazia } from './componentes.js';
 import { escaparHtml, urlImagem, formatarNota, formatarDuracao } from './formatar.js';
 import { tradutorDisponivel, criarTradutor, traduzirTexto } from './traducao.js';
@@ -39,6 +41,7 @@ function paginaDoFilme(filme) {
         <h1 class="filme-titulo">${titulo}</h1>
         <div class="filme-detalhes">${detalhes}</div>
         <p class="filme-nota">★ ${formatarNota(filme.nota)}${votos}</p>
+        <div id="nota-comunidade"></div>
         <p class="filme-sinopse">${escaparHtml(filme.sinopse ?? 'Sinopse não disponível.')}</p>
       </div>
     </div>
@@ -48,9 +51,20 @@ function paginaDoFilme(filme) {
       ${secaoOndeAssistir(filme.ondeAssistir)}
     </section>
 
+    <section class="secao" id="secao-avaliacoes" aria-labelledby="titulo-avaliacoes">
+      <h2 id="titulo-avaliacoes">Avaliações</h2>
+      <p class="dica">O que a comunidade achou, sem spoilers.</p>
+      <div class="resenhas" id="avaliacoes"></div>
+    </section>
+
     <section class="secao" aria-labelledby="titulo-resenhas">
-      <h2 id="titulo-resenhas">Resenhas</h2>
+      <h2 id="titulo-resenhas">Resenhas do TMDB</h2>
       <div class="resenhas" id="resenhas">${resenhas}</div>
+    </section>
+
+    <section class="secao" id="secao-discussao" aria-labelledby="titulo-discussao">
+      <h2 id="titulo-discussao">Discussão (com spoilers)</h2>
+      <div id="discussao"></div>
     </section>`;
 }
 
@@ -112,14 +126,19 @@ async function iniciar() {
     return;
   }
 
-  // 1) Buscar os dados. Se falhar, a mensagem vem do servidor (ex.: "Filme não encontrado.").
-  let filme;
-  try {
-    filme = await carregarFilme(id);
-  } catch (erro) {
-    area.innerHTML = listaVazia(erro.message);
+  // 1) Buscar os dados do filme e as avaliações AO MESMO TEMPO.
+  //    Promise.allSettled espera os dois e diz qual deu certo e qual falhou,
+  //    sem desistir de tudo se só um falhar (as avaliações são um "extra").
+  const [resultadoFilme, resultadoAvaliacoes] = await Promise.allSettled([
+    carregarFilme(id),
+    carregarAvaliacoes(id),
+  ]);
+  if (resultadoFilme.status === 'rejected') {
+    // A mensagem vem do servidor (ex.: "Filme não encontrado.").
+    area.innerHTML = listaVazia(resultadoFilme.reason.message);
     return;
   }
+  const filme = resultadoFilme.value;
 
   // 2) Montar a página. Se algo inesperado quebrar aqui, a pessoa vê uma mensagem
   //    clara (e o detalhe técnico vai para o console, onde quem programa olha).
@@ -136,6 +155,25 @@ async function iniciar() {
       const traduzir = evento.target.closest('[data-traduzir]');
       if (traduzir) alternarTraducao(traduzir, filme);
     });
+
+    // 3) A comunidade. Se as avaliações não carregaram, a página segue sem essa parte.
+    if (resultadoAvaliacoes.status === 'fulfilled') {
+      iniciarComunidade({
+        filmeId: filme.id,
+        usuario: await usuarioAtual,
+        avaliacoes: resultadoAvaliacoes.value,
+        elementos: {
+          nota: document.querySelector('#nota-comunidade'),
+          avaliacoes: document.querySelector('#avaliacoes'),
+          discussao: document.querySelector('#discussao'),
+        },
+      });
+    } else {
+      console.error(resultadoAvaliacoes.reason);
+      for (const parte of document.querySelectorAll('#nota-comunidade, #secao-avaliacoes, #secao-discussao')) {
+        parte.remove();
+      }
+    }
 
     // Só mostra os botões de traduzir se o navegador tiver o tradutor embutido.
     if (await tradutorDisponivel()) {

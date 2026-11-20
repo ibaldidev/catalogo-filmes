@@ -133,6 +133,150 @@ export function areaConta(usuario, destino) {
     <button type="button" class="link-botao" data-sair>Sair</button>`;
 }
 
+// ---------- Comunidade (página do filme) ----------
+
+// "Comunidade: ★ 8,2 (12 avaliações)" ao lado da nota do TMDB.
+export function notaComunidade({ media, total }) {
+  if (total === 0) return '<p class="nota-comunidade">Ainda sem avaliações da comunidade</p>';
+  const quantas = total === 1 ? '1 avaliação' : `${total} avaliações`;
+  return `<p class="nota-comunidade">Comunidade: ★ ${formatarNota(media)} <span class="votos">(${quantas})</span></p>`;
+}
+
+// Uma avaliação da comunidade. A da própria pessoa ganha "Editar" e "Apagar".
+export function cartaoAvaliacao(avaliacao, { minha = false } = {}) {
+  const data = formatarData(avaliacao.criadoEm);
+  const detalhes = [
+    data ? `<span>${data}</span>` : '',
+    `<span class="resenha-nota">★ ${escaparHtml(avaliacao.nota)}/10</span>`,
+    avaliacao.editada ? '<span>(editada)</span>' : '',
+  ].join('');
+  const texto = avaliacao.texto ? `<p class="resenha-texto">${escaparHtml(avaliacao.texto)}</p>` : '';
+  const acoes = minha
+    ? `<div class="resenha-acoes">
+        <button type="button" class="link-botao" data-editar-avaliacao>Editar</button>
+        <button type="button" class="link-botao" data-apagar-avaliacao>Apagar</button>
+      </div>`
+    : '';
+
+  return `
+    <article class="resenha">
+      <header>
+        <h3 class="resenha-autor">${escaparHtml(avaliacao.autor)}${minha ? ' <span class="etiqueta">Você</span>' : ''}</h3>
+        <div class="resenha-detalhes">${detalhes}</div>
+      </header>
+      ${texto}
+      ${acoes}
+    </article>`;
+}
+
+// Formulário para dar (ou editar) a própria avaliação.
+export function formularioAvaliacao(minha) {
+  const opcoes = Array.from({ length: 10 }, (_, i) => i + 1)
+    .map((nota) => `<option value="${nota}"${minha?.nota === nota ? ' selected' : ''}>${nota}</option>`)
+    .join('');
+  const cancelar = minha
+    ? '<button type="button" class="link-botao" data-cancelar-edicao>Cancelar</button>'
+    : '';
+
+  return `
+    <form class="formulario form-avaliacao" id="form-avaliacao">
+      <label>
+        Sua nota
+        <select name="nota" required>
+          <option value="">Escolha de 1 a 10</option>
+          ${opcoes}
+        </select>
+      </label>
+      <label>
+        O que você achou? <span class="dica">Opcional. Sem spoilers: quem ainda não assistiu lê esta parte.</span>
+        <textarea name="texto" maxlength="5000">${escaparHtml(minha?.texto ?? '')}</textarea>
+      </label>
+      <p class="form-mensagem" aria-live="polite"></p>
+      <div class="resenha-acoes">
+        <button type="submit" class="botao-principal">${minha ? 'Salvar alterações' : 'Publicar avaliação'}</button>
+        ${cancelar}
+      </div>
+    </form>`;
+}
+
+// O "portão" da Discussão: nada de comentários até a pessoa clicar.
+export function avisoSpoiler() {
+  return `
+    <div class="aviso-spoiler">
+      <p>Esta área pode conter spoilers.</p>
+      <button type="button" class="botao-principal" data-abrir-discussao>Já assisti, quero ver</button>
+    </div>`;
+}
+
+// Botões de um comentário ou resposta.
+function acoesComentario({ id, autor, meu }, podeResponder) {
+  const responder = podeResponder
+    ? `<button type="button" class="link-botao" data-responder="${escaparHtml(id)}" data-nome="${escaparHtml(autor)}">Responder</button>`
+    : '';
+  const apagar = meu
+    ? `<button type="button" class="link-botao" data-apagar-comentario="${escaparHtml(id)}">Apagar</button>`
+    : '';
+  return responder || apagar ? `<div class="resenha-acoes">${responder}${apagar}</div>` : '';
+}
+
+function cartaoResposta(resposta, podeResponder) {
+  return `
+    <div class="resposta">
+      <p class="comentario-topo"><strong>${escaparHtml(resposta.autor)}</strong> <span class="dica">${formatarData(resposta.criadoEm)}</span></p>
+      <p class="resenha-texto">${escaparHtml(resposta.texto)}</p>
+      ${acoesComentario(resposta, podeResponder)}
+    </div>`;
+}
+
+// Um comentário da Discussão, com as respostas embaixo.
+// Num comentário apagado não dá para responder (nem a ele, nem às respostas dele).
+export function cartaoComentario(comentario, { logado = false } = {}) {
+  const podeResponder = logado && !comentario.apagado;
+  const corpo = comentario.apagado
+    ? '<p class="comentario-apagado">Comentário apagado</p>'
+    : `
+      <p class="comentario-topo"><strong>${escaparHtml(comentario.autor)}</strong> <span class="dica">${formatarData(comentario.criadoEm)}</span></p>
+      <p class="resenha-texto">${escaparHtml(comentario.texto)}</p>
+      ${acoesComentario(comentario, podeResponder)}`;
+  const respostas = comentario.respostas.length > 0
+    ? `<div class="respostas">${comentario.respostas.map((r) => cartaoResposta(r, podeResponder)).join('')}</div>`
+    : '';
+
+  return `
+    <article class="comentario">
+      ${corpo}
+      ${respostas}
+      <div data-area-resposta></div>
+    </article>`;
+}
+
+// Campo para comentar ou, com respostaA, para responder (já começando com "@nome ").
+export function formularioComentario({ respostaA = null, nome = '' } = {}) {
+  const respondendo = respostaA !== null;
+  const inicio = respondendo && nome ? `@${nome} ` : '';
+  const cancelar = respondendo
+    ? '<button type="button" class="link-botao" data-cancelar-resposta>Cancelar</button>'
+    : '';
+
+  return `
+    <form class="formulario form-comentario" data-resposta-a="${respondendo ? escaparHtml(respostaA) : ''}">
+      <label>
+        ${respondendo ? 'Sua resposta' : 'Escreva um comentário'}
+        <textarea name="texto" maxlength="2000" required>${escaparHtml(inicio)}</textarea>
+      </label>
+      <p class="form-mensagem" aria-live="polite"></p>
+      <div class="resenha-acoes">
+        <button type="submit" class="botao-principal">${respondendo ? 'Responder' : 'Comentar'}</button>
+        ${cancelar}
+      </div>
+    </form>`;
+}
+
+// "Entre para avaliar" / "Entre para comentar", voltando para esta página depois.
+export function pedirLogin(acao, destino) {
+  return `<p class="pedir-login"><a href="${escaparHtml(linkEntrar(destino))}">Entre para ${escaparHtml(acao)}</a></p>`;
+}
+
 // Mensagem para quando não há nada a mostrar (ou deu erro).
 export function listaVazia(mensagem) {
   return `<p class="vazio">${escaparHtml(mensagem)}</p>`;
