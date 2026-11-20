@@ -4,6 +4,10 @@
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { ErroTmdb, limitarPagina } from './tmdb.js';
+import { abrirBanco } from './banco.js';
+import { criarContas } from './contas.js';
+import { ErroPedido } from './erros.js';
+import { lerCookies, cookieSessao, cookieApagado } from './cookies.js';
 import { MAX_PAGINA, PROVEDORES_PRINCIPAIS } from './constantes.js';
 import {
   simplificarResumo,
@@ -20,6 +24,9 @@ const ERRO_TMDB = 'Não foi possível falar com o TMDB agora. Tente de novo em i
 const ERRO_ENDERECO = 'Endereço inválido.';
 const ERRO_ROTA = 'Endereço não encontrado.';
 const ERRO_INTERNO = 'Algo deu errado no servidor. Tente de novo em instantes.';
+const ERRO_SEM_JSON = 'Envie os dados em JSON.';
+const ERRO_DADOS = 'Dados inválidos.';
+const METODOS_DE_ESCRITA = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
 // "8,119,abc" → [8, 119] (ignora o que não for número inteiro positivo)
 function lerProvedores(texto = '') {
@@ -38,11 +45,65 @@ function simplificarLista(raw) {
   };
 }
 
-export function criarApp({ tmdb }) {
+// Recebe de fora o cliente do TMDB, o banco e o relógio, para que os testes possam
+// usar versões falsas. Sem banco, usa um na memória (os testes da fase 1 não precisam dele).
+export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
   const app = express();
+  const contas = criarContas(db, { agora });
 
   // Arquivos do site: index.html, css, js, imagens...
   app.use(express.static(PASTA_PUBLICA));
+
+  // ---------- "Middlewares": funções que rodam antes de toda rota /api ----------
+
+  // 1) Toda escrita precisa vir em JSON. Um formulário HTML comum de outro site
+  //    não consegue enviar JSON, então isto é mais uma proteção contra CSRF.
+  app.use('/api', (req, res, next) => {
+    if (METODOS_DE_ESCRITA.includes(req.method) && !req.is('application/json')) {
+      next(new ErroPedido(400, ERRO_SEM_JSON));
+      return;
+    }
+    next();
+  });
+
+  // 2) Lê o corpo JSON do pedido para req.body (no máximo 20 KB).
+  app.use('/api', express.json({ limit: '20kb' }));
+
+  // 3) Descobre quem está fazendo o pedido, pelo cookie "sessao".
+  //    Depois daqui, toda rota sabe: req.usuario é o usuário, ou null se não entrou.
+  app.use('/api', (req, res, next) => {
+    req.token = lerCookies(req.headers.cookie).sessao;
+    req.usuario = contas.usuarioDaSessao(req.token);
+    next();
+  });
+
+  // ---------- Contas ----------
+
+  // Cadastro: cria a conta e já entra (status 201 = "criado").
+  app.post('/api/conta/cadastrar', (req, res) => {
+    const usuario = contas.cadastrar(req.body);
+    const token = contas.abrirSessao(usuario.id);
+    res.status(201).set('Set-Cookie', cookieSessao(token)).json({ usuario: { id: usuario.id, nome: usuario.nome } });
+  });
+
+  app.post('/api/conta/entrar', (req, res) => {
+    const { token, usuario } = contas.entrar(req.body);
+    res.set('Set-Cookie', cookieSessao(token)).json({ usuario: { id: usuario.id, nome: usuario.nome } });
+  });
+
+  // Sair: apaga a sessão no banco e pede ao navegador para jogar o cookie fora.
+  // (status 204 = "deu certo, e não há nada para devolver")
+  app.post('/api/conta/sair', (req, res) => {
+    contas.sair(req.token);
+    res.set('Set-Cookie', cookieApagado()).status(204).end();
+  });
+
+  // Quem sou eu? Só aqui o e-mail aparece, e só o da própria pessoa.
+  app.get('/api/conta/eu', (req, res) => {
+    res.json({ usuario: req.usuario });
+  });
+
+  // ---------- Catálogo (fase 1) ----------
 
   // Lista de serviços de streaming do Brasil.
   app.get('/api/provedores', async (req, res) => {
@@ -108,7 +169,17 @@ export function criarApp({ tmdb }) {
   //   502 = o TMDB falhou (fora do ar, lento, token errado)
   //   400 = o próprio endereço pedido está quebrado (ex.: /api/filme/%E0)
   //   500 = um defeito no NOSSO código
+  //   ErroPedido = erros esperados da comunidade (400, 401, 403, 404), com mensagem própria
   app.use((erro, req, res, next) => {
+    if (erro instanceof ErroPedido) {
+      res.status(erro.status).json({ erro: erro.message });
+      return;
+    }
+    // O JSON enviado estava quebrado ou grande demais.
+    if (erro.type === 'entity.parse.failed' || erro.type === 'entity.too.large') {
+      res.status(400).json({ erro: ERRO_DADOS });
+      return;
+    }
     if (erro instanceof ErroTmdb) {
       if (erro.status === 404) {
         res.status(404).json({ erro: ERRO_NAO_ENCONTRADO });

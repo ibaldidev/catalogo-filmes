@@ -28,3 +28,37 @@ export function iniciarServidor(app) {
     });
   });
 }
+
+// "Navegador de mentira" para os testes: faz pedidos ao servidor e, como um navegador
+// de verdade, guarda o cookie "sessao" que o servidor mandar e o devolve nos próximos.
+export function criarNavegador(url) {
+  const navegador = {
+    cookie: '', // ex.: 'sessao=abc'. O teste pode trocar à mão (para simular um token falso).
+
+    async pedir(caminho, { metodo = 'GET', corpo, tipo = 'application/json' } = {}) {
+      const cabecalhos = {};
+      if (navegador.cookie) cabecalhos.cookie = navegador.cookie;
+      if (corpo !== undefined) cabecalhos['content-type'] = tipo;
+
+      const resposta = await fetch(url + caminho, {
+        method: metodo,
+        headers: cabecalhos,
+        body: corpo === undefined ? undefined : typeof corpo === 'string' ? corpo : JSON.stringify(corpo),
+      });
+
+      for (const linha of resposta.headers.getSetCookie()) {
+        const [par] = linha.split(';');
+        if (!par.startsWith('sessao=')) continue;
+        navegador.cookie = /Max-Age=0/i.test(linha) ? '' : par;
+      }
+
+      const texto = await resposta.text();
+      return {
+        status: resposta.status,
+        corpo: texto ? JSON.parse(texto) : null,
+        cabecalhos: resposta.headers,
+      };
+    },
+  };
+  return navegador;
+}
