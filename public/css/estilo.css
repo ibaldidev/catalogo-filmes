@@ -127,6 +127,23 @@ img {
   cursor: pointer;
 }
 
+/* Conta no cabeçalho: "Entrar" ou "Olá, nome · Sair" */
+.conta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 24px;
+  font-size: 0.95rem;
+}
+
+.ola {
+  color: var(--penumbra);
+}
+
+.link-conta {
+  font-weight: 700;
+}
+
 /* ---------- Título-letreiro (o elemento marcante) ---------- */
 .letreiro {
   font-family: var(--fonte-letreiro);
@@ -298,6 +315,76 @@ img {
   line-height: 1;
   margin: 24px 0 20px;
   overflow-wrap: anywhere; /* buscas longas não estouram a tela */
+}
+
+/* ---------- Formulários (entrar, criar conta, avaliar, comentar) ---------- */
+.formulario {
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.formulario label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.formulario input,
+.formulario select,
+.formulario textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--cortina);
+  border-radius: var(--raio);
+  background: var(--poltrona);
+  color: var(--tela);
+  font: inherit;
+  font-weight: 400;
+}
+
+.formulario textarea {
+  min-height: 7em;
+  resize: vertical;
+}
+
+.dica {
+  margin: 0;
+  color: var(--penumbra);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Mensagem de erro do formulário (fica vazia até dar algo errado) */
+.form-mensagem {
+  margin: 0;
+  color: var(--letreiro);
+}
+
+.form-mensagem:empty {
+  display: none;
+}
+
+.botao-principal {
+  justify-self: start;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: var(--raio);
+  background: var(--letreiro);
+  color: var(--letreiro-escuro);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-principal:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.form-rodape {
+  margin: 24px 0 40px;
+  color: var(--penumbra);
 }
 
 /* ---------- Página do filme ---------- */

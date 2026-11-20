@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Criar conta | Em Cartaz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@800;900&display=swap">
+  <link rel="stylesheet" href="css/estilo.css">
+  <script type="module" src="js/conta.js"></script>
+</head>
+<body>
+  <header class="cabecalho">
+    <a class="marca" href="index.html">Em Cartaz</a>
+    <form class="busca" action="busca.html" role="search">
+      <label class="so-leitor" for="campo-busca">Buscar filme</label>
+      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme…" autocomplete="off">
+      <button type="submit">Buscar</button>
+    </form>
+  </header>
+
+  <main class="conteudo">
+    <h1 class="titulo-busca">Criar conta</h1>
+
+    <form class="formulario" id="form-conta" data-modo="cadastrar">
+      <label>
+        Nome que aparece para os outros
+        <input name="nome" type="text" autocomplete="nickname" minlength="2" maxlength="30" required>
+      </label>
+      <label>
+        E-mail
+        <input name="email" type="email" autocomplete="email" required>
+      </label>
+      <label>
+        Senha
+        <input name="senha" type="password" autocomplete="new-password" minlength="8" maxlength="200" required aria-describedby="dica-senha">
+        <span class="dica" id="dica-senha">Pelo menos 8 caracteres.</span>
+      </label>
+      <p class="dica">Seu e-mail não aparece para ninguém. Só o seu nome aparece nas avaliações e comentários.</p>
+      <p class="form-mensagem" id="mensagem" aria-live="polite"></p>
+      <button type="submit" class="botao-principal">Criar conta</button>
+    </form>
+
+    <p class="form-rodape">Já tem conta? <a id="link-outra" href="entrar.html">Entrar</a></p>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape-interno">
+      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">
+        <img src="img/tmdb-logo.svg" alt="The Movie Database (TMDB)">
+      </a>
+      <p>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB. Dados de streaming: JustWatch.</p>
+    </div>
+  </footer>
+</body>
+</html>

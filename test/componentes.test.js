@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cartaoFilme, listaVazia, secaoOndeAssistir, cartaoResenha, chipServico } from '../public/js/componentes.js';
+import { cartaoFilme, listaVazia, secaoOndeAssistir, cartaoResenha, chipServico, areaConta } from '../public/js/componentes.js';
 
 const semNada = { disponivel: false, link: null, assinatura: [], gratis: [], anuncios: [], aluguel: [], compra: [] };
 
@@ -161,4 +161,21 @@ test('resenha em português não tem botão de traduzir', () => {
 
   assert.ok(!html.includes('data-traduzir'));
   assert.ok(!html.includes('Traduzido pelo navegador'));
+});
+
+test('areaConta sem login mostra Entrar com volta', () => {
+  const html = areaConta(null, 'filme.html?id=550');
+
+  assert.ok(html.includes('href="entrar.html?volta=filme.html%3Fid%3D550"'));
+  assert.ok(html.includes('>Entrar<'));
+  assert.ok(!html.includes('Sair'));
+});
+
+test('areaConta com login escapa o nome e mostra Sair', () => {
+  const html = areaConta({ id: 1, nome: '<b>x</b>' }, 'index.html');
+
+  assert.ok(html.includes('Olá, &lt;b&gt;x&lt;/b&gt;'));
+  assert.ok(!html.includes('<b>'));
+  assert.match(html, /<button[^>]*data-sair[^>]*>Sair<\/button>/);
+  assert.ok(!html.includes('Entrar'));
 });

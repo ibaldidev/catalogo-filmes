@@ -3,6 +3,7 @@
 // escaparHtml antes de entrar no HTML.
 
 import { escaparHtml, urlImagem, formatarNota, cortarTexto } from './formatar.js';
+import { linkEntrar } from './navegacao.js';
 
 // Limite de caracteres antes do "Ler mais" nas resenhas.
 export const LIMITE_RESENHA = 600;
@@ -120,6 +121,16 @@ export function chipServico(provedor) {
       ${logo ? `<img src="${escaparHtml(logo)}" alt="" loading="lazy">` : ''}
       ${escaparHtml(provedor.nome)}
     </button>`;
+}
+
+// Parte da conta no cabeçalho: "Entrar" (visitante) ou "Olá, nome" + "Sair".
+export function areaConta(usuario, destino) {
+  if (!usuario) {
+    return `<a class="link-conta" href="${escaparHtml(linkEntrar(destino))}">Entrar</a>`;
+  }
+  return `
+    <span class="ola">Olá, ${escaparHtml(usuario.nome)}</span>
+    <button type="button" class="link-botao" data-sair>Sair</button>`;
 }
 
 // Mensagem para quando não há nada a mostrar (ou deu erro).
