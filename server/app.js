@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { ErroTmdb, limitarPagina } from './tmdb.js';
 import { abrirBanco } from './banco.js';
 import { criarContas } from './contas.js';
+import { criarComunidade } from './comunidade.js';
 import { ErroPedido } from './erros.js';
 import { lerCookies, cookieSessao, cookieApagado } from './cookies.js';
 import { MAX_PAGINA, PROVEDORES_PRINCIPAIS } from './constantes.js';
@@ -27,6 +28,20 @@ const ERRO_INTERNO = 'Algo deu errado no servidor. Tente de novo em instantes.';
 const ERRO_SEM_JSON = 'Envie os dados em JSON.';
 const ERRO_DADOS = 'Dados inválidos.';
 const METODOS_DE_ESCRITA = ['POST', 'PUT', 'PATCH', 'DELETE'];
+const ERRO_SEM_LOGIN = 'Entre na sua conta para continuar.';
+const ID_VALIDO = /^[1-9]\d*$/;
+
+// Para rotas que exigem conta: sem login, o pedido para aqui com 401.
+function exigirLogin(req) {
+  if (!req.usuario) throw new ErroPedido(401, ERRO_SEM_LOGIN);
+  return req.usuario;
+}
+
+// "550" → 550. Qualquer outra coisa ("abc", "0", "1.5") → 404.
+function lerIdFilme(req) {
+  if (!ID_VALIDO.test(req.params.id)) throw new ErroPedido(404, ERRO_NAO_ENCONTRADO);
+  return Number(req.params.id);
+}
 
 // "8,119,abc" → [8, 119] (ignora o que não for número inteiro positivo)
 function lerProvedores(texto = '') {
@@ -50,6 +65,7 @@ function simplificarLista(raw) {
 export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
   const app = express();
   const contas = criarContas(db, { agora });
+  const comunidade = criarComunidade(db, { agora });
 
   // Arquivos do site: index.html, css, js, imagens...
   app.use(express.static(PASTA_PUBLICA));
@@ -103,6 +119,27 @@ export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
     res.json({ usuario: req.usuario });
   });
 
+  // ---------- Avaliações (sem spoilers) ----------
+
+  // Ler não exige conta. Com login, a avaliação da pessoa vem separada em "minha".
+  app.get('/api/filme/:id/avaliacoes', (req, res) => {
+    res.json(comunidade.avaliacoesDoFilme(lerIdFilme(req), req.usuario?.id ?? null));
+  });
+
+  // PUT = "deixe assim": cria a avaliação ou troca a que já existe.
+  app.put('/api/filme/:id/avaliacao', (req, res) => {
+    const filmeId = lerIdFilme(req);
+    const usuario = exigirLogin(req);
+    res.json(comunidade.salvarAvaliacao(usuario.id, filmeId, req.body));
+  });
+
+  app.delete('/api/filme/:id/avaliacao', (req, res) => {
+    const filmeId = lerIdFilme(req);
+    const usuario = exigirLogin(req);
+    comunidade.apagarAvaliacao(usuario.id, filmeId);
+    res.status(204).end();
+  });
+
   // ---------- Catálogo (fase 1) ----------
 
   // Lista de serviços de streaming do Brasil.
@@ -138,7 +175,7 @@ export function criarApp({ tmdb, db = abrirBanco(), agora = Date.now }) {
 
   // Página completa de um filme.
   app.get('/api/filme/:id', async (req, res) => {
-    if (!/^[1-9]\d*$/.test(req.params.id)) {
+    if (!ID_VALIDO.test(req.params.id)) {
       res.status(404).json({ erro: ERRO_NAO_ENCONTRADO });
       return;
     }

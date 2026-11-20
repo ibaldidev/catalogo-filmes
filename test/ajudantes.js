@@ -29,6 +29,26 @@ export function iniciarServidor(app) {
   });
 }
 
+// Liga um servidor de teste da comunidade (banco novo na memória, relógio controlado).
+// novoUsuario('Ana') cadastra a Ana e devolve um navegador já logado como ela.
+// semLogin() devolve um navegador de visitante. relogio.agora pode ser avançado pelo teste.
+export async function ligarComunidade({ criarApp, abrirBanco, tmdb = {} }) {
+  const relogio = { agora: 1_700_000_000_000 };
+  const servidor = await iniciarServidor(criarApp({ tmdb, db: abrirBanco(), agora: () => relogio.agora }));
+
+  async function novoUsuario(nome) {
+    const navegador = criarNavegador(servidor.url);
+    const email = `${nome.toLowerCase()}@teste.com`;
+    const { status } = await navegador.pedir('/api/conta/cadastrar', {
+      metodo: 'POST', corpo: { email, senha: 'senha-de-teste', nome },
+    });
+    if (status !== 201) throw new Error(`não consegui cadastrar ${nome}`);
+    return navegador;
+  }
+
+  return { relogio, novoUsuario, semLogin: () => criarNavegador(servidor.url), fechar: servidor.fechar };
+}
+
 // "Navegador de mentira" para os testes: faz pedidos ao servidor e, como um navegador
 // de verdade, guarda o cookie "sessao" que o servidor mandar e o devolve nos próximos.
 export function criarNavegador(url) {
