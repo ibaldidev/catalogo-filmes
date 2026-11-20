@@ -9,6 +9,29 @@ Projeto de estudo, feito com HTML, CSS e JavaScript puro no navegador e um servi
 - **Página inicial:** os filmes mais bem avaliados (ou mais populares) incluídos na assinatura de algum streaming, com filtro por serviço (Netflix, Prime Video, Max...).
 - **Busca:** encontre qualquer filme pelo nome.
 - **Página do filme:** sinopse, nota, onde assistir no Brasil (assinatura, grátis, aluguel, compra) e resenhas.
+- **Comunidade:** com uma conta, você dá a sua nota, escreve o que achou (sem spoilers) e conversa na Discussão, que fica fechada até você dizer que já assistiu.
+
+## Como é o site
+
+![Página inicial do Em Cartaz no computador](docs/imagens/inicio.jpg)
+
+![Página de um filme, com a nota do TMDB e a nota da comunidade](docs/imagens/filme.jpg)
+
+### Comunidade
+
+| Avaliações (sem spoilers) | Discussão (com spoilers) |
+|---|---|
+| ![Avaliações da comunidade com nota e texto](docs/imagens/avaliacoes.jpg) | ![Discussão com comentários e respostas](docs/imagens/discussao.jpg) |
+
+### No celular
+
+<p>
+  <img src="docs/imagens/inicio-celular.jpg" alt="Página inicial no celular" width="280">
+  &nbsp;&nbsp;
+  <img src="docs/imagens/filme-celular.jpg" alt="Página de um filme no celular" width="280">
+</p>
+
+<sub>As contas, avaliações e comentários das fotos são exemplos. Pôsteres e imagens dos filmes: TMDB.</sub>
 
 ## Como rodar no seu computador
 
