@@ -6,3 +6,6 @@ node_modules/
 
 # Arquivos temporários do processo de construção
 .superpowers/
+
+# Banco de dados local (tem e-mails, mesmo que de teste)
+dados/
