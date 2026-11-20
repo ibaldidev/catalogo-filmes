@@ -4,7 +4,7 @@ import { carregarFilme, carregarAvaliacoes } from './api.js';
 import { usuarioAtual } from './cabecalho.js';
 import { iniciarComunidade } from './comunidade.js';
 import { secaoOndeAssistir, cartaoResenha, listaVazia } from './componentes.js';
-import { escaparHtml, urlImagem, formatarNota, formatarDuracao } from './formatar.js';
+import { escaparHtml, urlImagem, formatarNota, formatarDuracao, estrelas } from './formatar.js';
 import { tradutorDisponivel, criarTradutor, traduzirTexto } from './traducao.js';
 
 const area = document.querySelector('#filme');
@@ -17,55 +17,79 @@ const traducoes = new Map(); // id da resenha → texto traduzido (para não tra
 function paginaDoFilme(filme) {
   const titulo = escaparHtml(filme.titulo);
   const poster = urlImagem(filme.poster, 'w500');
+  const fundo = urlImagem(filme.fundo, 'w1280');
 
   const imagem = poster
     ? `<img class="filme-poster" src="${escaparHtml(poster)}" alt="Pôster de ${titulo}">`
-    : '<div class="filme-poster sem-poster">Sem pôster</div>';
+    : `<div class="filme-poster sem-poster">${titulo}</div>`;
+
+  // A imagem de cena no topo. Sem ela, fica só um espaço para o cabeçalho não cobrir o título.
+  const faixa = fundo
+    ? `<div class="filme-fundo"><img src="${escaparHtml(fundo)}" alt=""></div>`
+    : '<div class="filme-fundo sem-imagem"></div>';
 
   // Só entram os detalhes que existem (nada de "null" na tela).
-  const detalhes = [filme.ano, formatarDuracao(filme.duracaoMin), filme.generos.map(escaparHtml).join(', ')]
+  const detalhes = [formatarDuracao(filme.duracaoMin), filme.generos.map(escaparHtml).join(', ')]
     .filter(Boolean)
     .map((d) => `<span>${d}</span>`)
     .join('');
 
-  const votos = filme.votos > 0 ? ` <span class="votos">(${filme.votos.toLocaleString('pt-BR')} votos)</span>` : '';
+  const ano = filme.ano ? ` <span class="filme-ano">${filme.ano}</span>` : '';
+  const votos = filme.votos > 0 ? `<span class="votos">${filme.votos.toLocaleString('pt-BR')} votos</span>` : '';
 
   const resenhas = filme.resenhas.length > 0
     ? filme.resenhas.map(cartaoResenha).join('')
     : listaVazia('Ainda não há resenhas para este filme.');
 
   return `
-    <div class="filme-topo">
-      ${imagem}
-      <div class="filme-info">
-        <h1 class="filme-titulo">${titulo}</h1>
+    ${faixa}
+    <div class="filme-corpo">
+      <div class="filme-lateral">${imagem}</div>
+
+      <header class="filme-cabeca">
+        <h1 class="filme-titulo">${titulo}${ano}</h1>
         <div class="filme-detalhes">${detalhes}</div>
-        <p class="filme-nota">★ ${formatarNota(filme.nota)}${votos}</p>
-        <div id="nota-comunidade"></div>
-        <p class="filme-sinopse">${escaparHtml(filme.sinopse ?? 'Sinopse não disponível.')}</p>
+      </header>
+
+      <div class="filme-principal">
+        <div class="filme-resumo">
+          <p class="filme-sinopse">${escaparHtml(filme.sinopse ?? 'Sinopse não disponível.')}</p>
+
+          <aside class="painel-notas" aria-label="Notas">
+            <p class="painel-linha">
+              <span class="painel-rotulo">TMDB</span>
+              <span class="painel-nota">${formatarNota(filme.nota)}</span>
+              <span class="estrelas" aria-hidden="true">${estrelas(filme.nota)}</span>
+              ${votos}
+            </p>
+            <div id="nota-comunidade"></div>
+          </aside>
+        </div>
+
+        <section class="secao" aria-labelledby="titulo-onde">
+          <h2 class="titulo-secao" id="titulo-onde">Onde assistir</h2>
+          ${secaoOndeAssistir(filme.ondeAssistir)}
+        </section>
+
+        <section class="secao" id="secao-avaliacoes" aria-labelledby="titulo-avaliacoes">
+          <div class="cabeca-secao">
+            <h2 class="titulo-secao" id="titulo-avaliacoes">Avaliações da comunidade</h2>
+            <span class="dica">Sem spoilers</span>
+          </div>
+          <div class="resenhas" id="avaliacoes"></div>
+        </section>
+
+        <section class="secao" aria-labelledby="titulo-resenhas">
+          <h2 class="titulo-secao" id="titulo-resenhas">Resenhas do TMDB</h2>
+          <div class="resenhas" id="resenhas">${resenhas}</div>
+        </section>
+
+        <section class="secao" id="secao-discussao" aria-labelledby="titulo-discussao">
+          <h2 class="titulo-secao" id="titulo-discussao">Discussão (com spoilers)</h2>
+          <div id="discussao"></div>
+        </section>
       </div>
-    </div>
-
-    <section class="secao" aria-labelledby="titulo-onde">
-      <h2 id="titulo-onde">Onde assistir</h2>
-      ${secaoOndeAssistir(filme.ondeAssistir)}
-    </section>
-
-    <section class="secao" id="secao-avaliacoes" aria-labelledby="titulo-avaliacoes">
-      <h2 id="titulo-avaliacoes">Avaliações</h2>
-      <p class="dica">O que a comunidade achou, sem spoilers.</p>
-      <div class="resenhas" id="avaliacoes"></div>
-    </section>
-
-    <section class="secao" aria-labelledby="titulo-resenhas">
-      <h2 id="titulo-resenhas">Resenhas do TMDB</h2>
-      <div class="resenhas" id="resenhas">${resenhas}</div>
-    </section>
-
-    <section class="secao" id="secao-discussao" aria-labelledby="titulo-discussao">
-      <h2 id="titulo-discussao">Discussão (com spoilers)</h2>
-      <div id="discussao"></div>
-    </section>`;
+    </div>`;
 }
 
 // "Ler mais": troca o trecho pelo texto completo.

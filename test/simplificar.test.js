@@ -33,6 +33,7 @@ test('resumo completo', () => {
     titulo: 'Clube da Luta',
     ano: 1999,
     poster: '/a.jpg',
+    fundo: '/fundo.jpg',
     nota: 8.4,
     votos: 30000,
   });

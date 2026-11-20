@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { escaparHtml, urlImagem, formatarNota, formatarDuracao, cortarTexto } from '../public/js/formatar.js';
+import { escaparHtml, urlImagem, formatarNota, formatarDuracao, cortarTexto, estrelas } from '../public/js/formatar.js';
 
 test('escaparHtml', () => {
   assert.equal(escaparHtml(`<script>"&'`), '&lt;script&gt;&quot;&amp;&#39;');
@@ -32,4 +32,15 @@ test('cortarTexto', () => {
   assert.deepEqual(cortarTexto('abc def', 3), { curto: 'abc…', cortado: true });
   assert.deepEqual(cortarTexto('abc', 10), { curto: 'abc', cortado: false });
   assert.deepEqual(cortarTexto('abc', 3), { curto: 'abc', cortado: false });
+});
+
+test('estrelas: nota de 0 a 10 vira 0 a 5 estrelas, com meia', () => {
+  assert.equal(estrelas(10), '★★★★★');
+  assert.equal(estrelas(8), '★★★★');
+  assert.equal(estrelas(7), '★★★½');
+  assert.equal(estrelas(1), '½');
+  assert.equal(estrelas(8.4), '★★★★'); // arredonda para a meia estrela mais próxima
+  assert.equal(estrelas(8.6), '★★★★½');
+  assert.equal(estrelas(null), '');
+  assert.equal(estrelas(12), '★★★★★'); // nunca passa de 5
 });

@@ -24,6 +24,14 @@ export function formatarNota(nota) {
   return nota.toFixed(1).replace('.', ',');
 }
 
+// Nota de 0 a 10 → estrelas de 0 a 5, com meia estrela (como no Letterboxd).
+// 8 → "★★★★", 7 → "★★★½", 8,4 → "★★★★" (arredonda para a meia estrela mais próxima)
+export function estrelas(nota) {
+  if (nota === null || nota === undefined) return '';
+  const meias = Math.round(Math.min(Math.max(nota, 0), 10)); // quantas meias estrelas: 0 a 10
+  return '★'.repeat(Math.floor(meias / 2)) + (meias % 2 === 1 ? '½' : '');
+}
+
 // 139 → "2h 19min"
 export function formatarDuracao(minutos) {
   if (!minutos) return '';

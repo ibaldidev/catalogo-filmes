@@ -13,6 +13,13 @@ export const usuarioAtual = quemSouEu().catch(() => null);
 
 const area = document.querySelector('#conta');
 
+// Partes marcadas com data-so-visitante (o convite para criar conta, a apresentação
+// do site) somem para quem já entrou. Começam visíveis, porque a maioria é visitante.
+usuarioAtual.then((usuario) => {
+  if (!usuario) return;
+  for (const parte of document.querySelectorAll('[data-so-visitante]')) parte.hidden = true;
+});
+
 if (area) {
   usuarioAtual.then((usuario) => {
     area.innerHTML = areaConta(usuario, destinoDe(location.pathname, location.search));

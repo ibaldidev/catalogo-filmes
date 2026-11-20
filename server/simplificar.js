@@ -23,6 +23,7 @@ export function simplificarResumo(raw) {
     titulo: raw.title,
     ano: raw.release_date ? Number(raw.release_date.slice(0, 4)) : null,
     poster: raw.poster_path || null,
+    fundo: raw.backdrop_path || null, // imagem larga de uma cena do filme (o "backdrop")
     nota: votos > 0 ? arredondar(raw.vote_average) : null, // sem votos, a nota não diz nada
     votos,
   };

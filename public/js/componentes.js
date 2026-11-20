@@ -2,8 +2,8 @@
 // Todo texto que vem do TMDB (inclusive os endereços de imagem) passa por
 // escaparHtml antes de entrar no HTML.
 
-import { escaparHtml, urlImagem, formatarNota, cortarTexto } from './formatar.js';
-import { linkEntrar } from './navegacao.js';
+import { escaparHtml, urlImagem, formatarNota, cortarTexto, estrelas } from './formatar.js';
+import { linkEntrar, linkCadastrar } from './navegacao.js';
 
 // Limite de caracteres antes do "Ler mais" nas resenhas.
 export const LIMITE_RESENHA = 600;
@@ -18,27 +18,40 @@ const GRUPOS_ONDE_ASSISTIR = [
 ];
 
 // Cartão de um filme numa grade (página inicial e busca).
+// Como no Letterboxd, a grade mostra só os pôsteres. O título (e o ano) aparece num
+// balão ao passar o mouse ou chegar pelo teclado; leitores de tela leem o título sempre.
+// O alt da imagem fica vazio de propósito: o título já está no link, não precisa repetir.
 export function cartaoFilme(filme) {
   const titulo = escaparHtml(filme.titulo);
   const poster = urlImagem(filme.poster);
 
   const imagem = poster
-    ? `<img class="cartao-poster" src="${escaparHtml(poster)}" alt="Pôster de ${titulo}" loading="lazy">`
-    : `<div class="cartao-poster sem-poster">Sem pôster</div>`;
+    ? `<img class="cartao-poster" src="${escaparHtml(poster)}" alt="" loading="lazy">`
+    : `<span class="sem-poster" aria-hidden="true">${titulo}</span>`;
 
-  const ano = filme.ano ? `<span class="cartao-ano">${filme.ano}</span>` : '';
+  const ano = filme.ano ? ` <span class="cartao-ano">${filme.ano}</span>` : '';
+  const nota = filme.nota !== null && filme.nota !== undefined
+    ? `<span class="cartao-nota" title="Nota no TMDB">★ ${formatarNota(filme.nota)}</span>`
+    : '';
 
   return `
     <a class="cartao" href="filme.html?id=${filme.id}">
-      ${imagem}
-      <div class="cartao-info">
-        <h3 class="cartao-titulo">${titulo}</h3>
-        <div class="cartao-detalhes">
-          ${ano}
-          <span class="cartao-nota" title="Nota no TMDB">★ ${formatarNota(filme.nota)}</span>
-        </div>
-      </div>
+      <span class="cartao-capa">${imagem}</span>
+      <span class="cartao-titulo">${titulo}${ano}</span>
+      ${nota}
     </a>`;
+}
+
+// Bolinha com a primeira letra do nome, no lugar da foto de perfil.
+export function avatar(nome) {
+  const letra = String(nome ?? '').trim().charAt(0).toUpperCase() || '?';
+  return `<span class="avatar" aria-hidden="true">${escaparHtml(letra)}</span>`;
+}
+
+// Nota de 1 a 10 em estrelas verdes. O leitor de tela ouve "Nota 8 de 10".
+export function notaEmEstrelas(nota) {
+  const numero = escaparHtml(String(nota).replace('.', ','));
+  return `<span class="estrelas"><span aria-hidden="true">${estrelas(nota)}</span><span class="so-leitor">Nota ${numero} de 10</span></span>`;
 }
 
 // Seção "Onde assistir" da página do filme.
@@ -83,7 +96,6 @@ export function cartaoResenha(resenha) {
 
   const detalhes = [
     data ? `<span>${data}</span>` : '',
-    resenha.nota !== null ? `<span class="resenha-nota">★ ${escaparHtml(String(resenha.nota).replace('.', ','))}/10</span>` : '',
     resenha.idioma === 'en-US' ? '<span class="etiqueta">Em inglês</span>' : '',
   ].join('');
 
@@ -102,15 +114,21 @@ export function cartaoResenha(resenha) {
 
   const acoes = lerMais || traduzir ? `<div class="resenha-acoes">${lerMais}${traduzir}</div>` : '';
 
+  const nota = resenha.nota !== null ? notaEmEstrelas(resenha.nota) : '';
+
   return `
     <article class="resenha">
-      <header>
-        <h3 class="resenha-autor">${escaparHtml(resenha.autor)}</h3>
-        <div class="resenha-detalhes">${detalhes}</div>
-      </header>
-      <p class="resenha-texto">${escaparHtml(curto)}</p>
-      ${aviso}
-      ${acoes}
+      ${avatar(resenha.autor)}
+      <div class="resenha-corpo">
+        <header class="resenha-cabeca">
+          <h3 class="resenha-autor">${escaparHtml(resenha.autor)}</h3>
+          ${nota}
+          <span class="resenha-detalhes">${detalhes}</span>
+        </header>
+        <p class="resenha-texto">${escaparHtml(curto)}</p>
+        ${aviso}
+        ${acoes}
+      </div>
     </article>`;
 }
 
@@ -129,7 +147,9 @@ export function chipServico(provedor) {
 // Parte da conta no cabeçalho: "Entrar" (visitante) ou "Olá, nome" + "Sair".
 export function areaConta(usuario, destino) {
   if (!usuario) {
-    return `<a class="link-conta" href="${escaparHtml(linkEntrar(destino))}">Entrar</a>`;
+    return `
+      <a class="link-conta" href="${escaparHtml(linkEntrar(destino))}">Entrar</a>
+      <a class="link-conta" href="${escaparHtml(linkCadastrar(destino))}">Criar conta</a>`;
   }
   return `
     <span class="ola">Olá, ${escaparHtml(usuario.nome)}</span>
@@ -139,10 +159,19 @@ export function areaConta(usuario, destino) {
 // ---------- Comunidade (página do filme) ----------
 
 // "Comunidade: ★ 8,2 (12 avaliações)" ao lado da nota do TMDB.
+// Fica no painel de notas da página do filme, embaixo da nota do TMDB.
 export function notaComunidade({ media, total }) {
-  if (total === 0) return '<p class="nota-comunidade">Ainda sem avaliações da comunidade</p>';
+  if (total === 0) {
+    return '<p class="painel-linha"><span class="painel-rotulo">Comunidade</span> <span class="votos">Ninguém avaliou ainda</span></p>';
+  }
   const quantas = total === 1 ? '1 avaliação' : `${total} avaliações`;
-  return `<p class="nota-comunidade">Comunidade: ★ ${formatarNota(media)} <span class="votos">(${quantas})</span></p>`;
+  return `
+    <p class="painel-linha">
+      <span class="painel-rotulo">Comunidade</span>
+      <span class="painel-nota">${formatarNota(media)}</span>
+      <span class="estrelas" aria-hidden="true">${estrelas(media)}</span>
+      <span class="votos">${quantas}</span>
+    </p>`;
 }
 
 // Uma avaliação da comunidade. A da própria pessoa ganha "Editar" e "Apagar".
@@ -150,7 +179,6 @@ export function cartaoAvaliacao(avaliacao, { minha = false } = {}) {
   const data = formatarData(avaliacao.criadoEm, { utc: false });
   const detalhes = [
     data ? `<span>${data}</span>` : '',
-    `<span class="resenha-nota">★ ${escaparHtml(avaliacao.nota)}/10</span>`,
     avaliacao.editada ? '<span>(editada)</span>' : '',
   ].join('');
   const texto = avaliacao.texto ? `<p class="resenha-texto">${escaparHtml(avaliacao.texto)}</p>` : '';
@@ -163,19 +191,23 @@ export function cartaoAvaliacao(avaliacao, { minha = false } = {}) {
 
   return `
     <article class="resenha">
-      <header>
-        <h3 class="resenha-autor">${escaparHtml(avaliacao.autor)}${minha ? ' <span class="etiqueta">Você</span>' : ''}</h3>
-        <div class="resenha-detalhes">${detalhes}</div>
-      </header>
-      ${texto}
-      ${acoes}
+      ${avatar(avaliacao.autor)}
+      <div class="resenha-corpo">
+        <header class="resenha-cabeca">
+          <h3 class="resenha-autor">${escaparHtml(avaliacao.autor)}${minha ? ' <span class="etiqueta">Você</span>' : ''}</h3>
+          ${notaEmEstrelas(avaliacao.nota)}
+          <span class="resenha-detalhes">${detalhes}</span>
+        </header>
+        ${texto}
+        ${acoes}
+      </div>
     </article>`;
 }
 
 // Formulário para dar (ou editar) a própria avaliação.
 export function formularioAvaliacao(minha) {
   const opcoes = Array.from({ length: 10 }, (_, i) => i + 1)
-    .map((nota) => `<option value="${nota}"${minha?.nota === nota ? ' selected' : ''}>${nota}</option>`)
+    .map((nota) => `<option value="${nota}"${minha?.nota === nota ? ' selected' : ''}>${estrelas(nota)} (${nota} de 10)</option>`)
     .join('');
   const cancelar = minha
     ? '<button type="button" class="link-botao" data-cancelar-edicao>Cancelar</button>'
@@ -247,9 +279,12 @@ export function cartaoComentario(comentario, { logado = false } = {}) {
 
   return `
     <article class="comentario">
-      ${corpo}
-      ${respostas}
-      <div data-area-resposta></div>
+      ${comentario.apagado ? '<span class="avatar avatar-vazio" aria-hidden="true"></span>' : avatar(comentario.autor)}
+      <div class="resenha-corpo">
+        ${corpo}
+        ${respostas}
+        <div data-area-resposta></div>
+      </div>
     </article>`;
 }
 

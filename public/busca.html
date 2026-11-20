@@ -6,7 +6,7 @@
   <title>Buscar | Em Cartaz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
   <link rel="stylesheet" href="css/estilo.css">
   <script type="module" src="js/cabecalho.js"></script>
   <script type="module" src="js/busca.js"></script>
@@ -14,16 +14,22 @@
 <body>
   <header class="cabecalho">
     <a class="marca" href="index.html">Em Cartaz</a>
+    <nav class="menu" aria-label="Principal">
+      <div class="conta" id="conta"></div>
+      <a href="index.html#catalogo">Filmes</a>
+    </nav>
     <form class="busca" action="busca.html" role="search">
       <label class="so-leitor" for="campo-busca">Buscar filme</label>
-      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme…" autocomplete="off">
-      <button type="submit">Buscar</button>
+      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme" autocomplete="off">
+      <button type="submit">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span class="so-leitor">Buscar</span>
+      </button>
     </form>
-    <div class="conta" id="conta"></div>
   </header>
 
   <main class="conteudo">
-    <h1 class="titulo-busca" id="titulo-busca">Buscar filme</h1>
+    <h1 class="titulo-secao titulo-pagina" id="titulo-busca">Buscar filme</h1>
     <div class="grade" id="grade" aria-live="polite"></div>
     <button type="button" class="carregar-mais" id="carregar-mais" hidden>Carregar mais filmes</button>
   </main>

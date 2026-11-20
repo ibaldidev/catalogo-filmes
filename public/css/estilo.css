@@ -1,26 +1,34 @@
 /* =========================================================
    Em Cartaz: estilos do site
-   Ideia: a sala de cinema escura, com a luz âmbar do letreiro.
+   Visual inspirado no Letterboxd: fundo grafite-azulado, pôsteres
+   em destaque, estrelas verdes, títulos de seção pequenos em
+   maiúsculas e títulos de filme numa serifa forte.
    O CSS é "mobile-first": primeiro o celular, depois as telas
    maiores, dentro de @media (min-width: ...).
    ========================================================= */
 
 /* ---------- Cores, fontes e medidas (as "variáveis" do site) ---------- */
 :root {
-  --sala: #1a1530;          /* fundo: sala escura */
-  --poltrona: #251e42;      /* superfícies: um tom acima do fundo */
-  --cortina: #3a2f63;       /* bordas e divisórias */
-  --tela: #ece8f5;          /* texto principal */
-  --penumbra: #a79fc4;      /* texto secundário */
-  --letreiro: #f5b83d;      /* destaque: luz do letreiro */
-  --letreiro-escuro: #2b1d00; /* texto sobre o destaque */
+  --fundo: #14181c;          /* fundo da página */
+  --painel: #2c3440;         /* painéis, campos, rodapé */
+  --ardosia: #445566;        /* quadros, linhas de seção, avatares */
+  --texto: #99aabb;          /* texto principal (cinza-azulado) */
+  --texto-fraco: #778899;    /* datas e detalhes pequenos */
+  --claro: #ddeeff;          /* nomes, links, menu */
+  --branco: #ffffff;         /* títulos */
 
-  --fonte-letreiro: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
-  --fonte-texto: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --verde: #00e054;          /* estrelas e notas */
+  --verde-botao: #00871e;    /* botões: um verde mais escuro, para o texto branco ficar legível */
+  --verde-botao-forte: #00a022;
+  --laranja: #ff8000;        /* destaque e aviso de spoiler */
+  --azul: #40bcf4;           /* links ao passar o mouse e foco do teclado */
+
+  --fonte-titulo: 'Source Serif 4', Georgia, serif;
+  --fonte-texto: 'Hanken Grotesk', system-ui, sans-serif;
 
   --margem: 16px;
-  --largura-max: 1200px;
-  --raio: 6px;
+  --largura-max: 990px;      /* a coluna estreita do Letterboxd: tudo cabe num olhar */
+  --raio: 4px;
 }
 
 /* ---------- Base ---------- */
@@ -30,20 +38,41 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip; /* o balão de título de um pôster na borda não cria rolagem lateral */
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--sala);
-  color: var(--tela);
+  overflow-x: clip;
+  background: var(--fundo);
+  color: var(--texto);
   font-family: var(--fonte-texto);
   font-size: 1rem;
   line-height: 1.5;
 }
 
+main {
+  flex: 1;
+}
+
 a {
-  color: var(--letreiro);
+  color: var(--claro);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--azul);
+}
+
+/* Links no meio de um texto ganham sublinhado: não dá para depender só da cor */
+p a {
+  text-decoration: underline;
+  text-decoration-color: rgba(221, 238, 255, 0.35);
+  text-underline-offset: 3px;
 }
 
 img {
@@ -60,7 +89,7 @@ img {
 
 /* Contorno visível para quem navega pelo teclado (Tab) */
 :focus-visible {
-  outline: 3px solid var(--letreiro);
+  outline: 2px solid var(--azul);
   outline-offset: 2px;
 }
 
@@ -69,252 +98,560 @@ img {
   max-width: var(--largura-max);
   margin: 0 auto;
   padding: 0 var(--margem);
-  flex: 1;
 }
 
 /* ---------- Cabeçalho ---------- */
 .cabecalho {
+  position: relative;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 10px 22px;
+  width: 100%;
   max-width: var(--largura-max);
   margin: 0 auto;
-  padding: 14px var(--margem);
-  width: 100%;
+  padding: 18px var(--margem);
+}
+
+/* Nas páginas com imagem grande no topo, o cabeçalho flutua por cima dela */
+.com-fundo .cabecalho {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .marca {
-  font-family: var(--fonte-letreiro);
+  margin-right: auto;
+  color: var(--branco);
   font-weight: 800;
   font-size: 1.6rem;
-  letter-spacing: 0.04em;
-  color: var(--letreiro);
-  text-decoration: none;
-  margin-right: auto;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
 }
 
-.busca {
-  display: flex;
-  flex: 1 1 220px;
-  max-width: 420px;
+.marca:hover {
+  color: var(--branco);
 }
 
-.busca input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--cortina);
-  border-right: 0;
-  border-radius: var(--raio) 0 0 var(--raio);
-  background: var(--poltrona);
-  color: var(--tela);
-  font: inherit;
-}
-
-.busca input::placeholder {
-  color: var(--penumbra);
-}
-
-.busca button {
-  padding: 10px 14px;
-  border: 0;
-  border-radius: 0 var(--raio) var(--raio) 0;
-  background: var(--letreiro);
-  color: var(--letreiro-escuro);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Conta no cabeçalho: "Entrar" ou "Olá, nome · Sair" */
+/* Menu: palavras pequenas, em maiúsculas e espaçadas */
+.menu,
 .conta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 24px;
-  font-size: 0.95rem;
+  gap: 18px;
+}
+
+.menu {
+  order: 3; /* no celular, o menu desce para uma linha própria */
+  width: 100%;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+.menu a,
+.menu .link-botao {
+  color: var(--claro);
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.menu a:hover,
+.menu .link-botao:hover {
+  color: var(--branco);
 }
 
 .ola {
-  color: var(--penumbra);
+  color: var(--texto);
 }
 
-.link-conta {
-  font-weight: 700;
+/* Busca em forma de pílula, com a lupa dentro */
+.busca {
+  position: relative;
+  flex: 1 1 140px;
+  max-width: 190px;
 }
 
-/* ---------- Título-letreiro (o elemento marcante) ---------- */
-.letreiro {
-  font-family: var(--fonte-letreiro);
-  font-weight: 900;
-  font-size: clamp(2.6rem, 11vw, 5.5rem);
-  line-height: 0.92;
-  letter-spacing: 0.01em;
-  margin: 24px 0 20px;
-  color: var(--tela);
-  text-shadow: 0 0 28px rgba(245, 184, 61, 0.35); /* brilho de lâmpada */
-}
-
-/* ---------- Controles: ordem e serviços ---------- */
-.controles {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-/* Alternador "Mais bem avaliados | Populares agora" */
-.ordem {
-  display: inline-flex;
-  align-self: flex-start;
-  border: 1px solid var(--cortina);
+.busca input {
+  width: 100%;
+  padding: 7px 34px 7px 14px;
+  border: 0;
   border-radius: 999px;
-  padding: 3px;
+  background: var(--painel);
+  color: var(--claro);
+  font: inherit;
+  font-size: 0.875rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.com-fundo .busca input {
+  background: rgba(221, 238, 255, 0.2);
+}
+
+.busca input::placeholder {
+  color: var(--texto);
+}
+
+/* Ao clicar no campo, ele fica claro (como no Letterboxd) */
+.busca input:focus {
+  background: var(--branco);
+  color: #223344;
+  outline: none;
+}
+
+.busca button {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--claro);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.busca:focus-within button {
+  color: #223344;
+}
+
+/* ---------- Palco: a imagem grande do topo da página inicial ---------- */
+.palco {
+  position: relative;
+  display: grid;
+  align-items: end;
+  max-width: 1200px;
+  min-height: 480px;
+  margin: 0 auto;
+  padding-top: 140px;
+}
+
+.palco-imagem {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.palco-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0;
+  transition: opacity 1.2s ease; /* o único movimento automático do site */
+}
+
+.palco-foto.carregada {
+  opacity: 1;
+}
+
+/* A imagem "some" nas bordas, misturando-se ao fundo da página */
+.palco-imagem::after,
+.filme-fundo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--fundo) 0%, rgba(20, 24, 28, 0) 16%, rgba(20, 24, 28, 0) 84%, var(--fundo) 100%),
+    linear-gradient(to top, var(--fundo) 6%, rgba(20, 24, 28, 0.6) 38%, rgba(20, 24, 28, 0.1) 70%, rgba(20, 24, 28, 0.55) 100%);
+}
+
+/* Nome do filme da imagem, escrito de lado na borda direita */
+.palco-credito {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 6px;
+  color: rgba(221, 238, 255, 0.45);
+  font-size: 0.75rem;
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.palco-texto {
+  position: relative;
+  padding: 0 var(--margem);
+  text-align: center;
+}
+
+.palco-titulo {
+  margin: 0 auto;
+  color: var(--branco);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.6vw, 2.35rem);
+  font-variation-settings: 'opsz' 60;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
+}
+
+.botao-grande {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 11px 24px;
+  border-radius: var(--raio);
+  background: var(--verde-botao);
+  color: var(--branco);
+  font-size: 1.125rem;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.botao-grande:hover {
+  background: var(--verde-botao-forte);
+  color: var(--branco);
+}
+
+.palco-legenda {
+  margin: 22px 0 0;
+  color: var(--texto);
+  font-size: 1rem;
+}
+
+/* ---------- Pôsteres ---------- */
+.destaques {
+  margin-top: 40px;
+}
+
+.destaques-grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Cada página do catálogo traz 20 filmes: 4 colunas no celular e 5 nas telas
+   maiores dividem 20 certinho, então nenhuma linha fica pela metade. */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 10px;
+}
+
+.cartao {
+  position: relative;
+  display: block;
+  color: var(--texto);
+}
+
+/* Todos os balões e bordas partem desta "capa" de pôster */
+.cartao-capa {
+  position: relative;
+  display: block;
+  aspect-ratio: 2 / 3; /* formato de pôster */
+  overflow: hidden;
+  border-radius: var(--raio);
+  background: var(--painel);
+}
+
+/* A borda fina e clara em volta de cada pôster, que vira verde ao passar o mouse */
+.cartao-capa::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(221, 238, 255, 0.2);
+}
+
+.cartao:hover .cartao-capa::after,
+.cartao:focus-visible .cartao-capa::after {
+  box-shadow: inset 0 0 0 3px var(--verde);
+}
+
+.cartao:focus-visible {
+  outline: none; /* a borda verde da capa já mostra o foco */
+}
+
+.cartao-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Filme sem pôster: o título escrito no lugar da imagem */
+.sem-poster {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 10px;
+  color: var(--claro);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* O balão com "Título ano" que aparece acima do pôster */
+.cartao-titulo {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  display: none;
+  width: max-content;
+  max-width: 200px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: var(--ardosia);
+  color: var(--claro);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* A setinha do balão */
+.cartao-titulo::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 5px solid transparent;
+  border-top-color: var(--ardosia);
+  transform: translateX(-50%);
+}
+
+.cartao:hover .cartao-titulo,
+.cartao:focus-visible .cartao-titulo {
+  display: block;
+}
+
+.cartao-ano {
+  color: var(--texto);
+  font-weight: 400;
+}
+
+.cartao-nota {
+  display: block;
+  margin-top: 5px;
+  color: var(--verde);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Seções e seus títulos pequenos ---------- */
+.secao {
+  margin-top: 48px;
+}
+
+.titulo-secao {
+  margin: 0 0 14px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--ardosia);
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.075em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+/* Título de seção com algo à direita (ordem, dica): a linha passa a ser da caixa toda */
+.cabeca-secao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--ardosia);
+}
+
+.cabeca-secao .titulo-secao {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Página de busca: o título "Resultados para…" no mesmo estilo */
+.titulo-pagina {
+  margin-top: 36px;
+  overflow-wrap: anywhere; /* buscas longas não estouram a tela */
+}
+
+/* ---------- Quadros "No Em Cartaz você pode…" ---------- */
+.recursos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recursos li {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: var(--raio);
+  background: var(--ardosia);
+  color: var(--claro);
+}
+
+.recursos svg {
+  width: 40px;
+  height: 40px;
+  fill: #99aabb;
+  color: #99aabb;
+}
+
+.recursos p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.recursos .recurso-destaque {
+  background: var(--laranja);
+  color: var(--fundo);
+}
+
+.recursos .recurso-destaque svg {
+  fill: var(--branco);
+}
+
+/* ---------- Controles do catálogo: ordem e serviços ---------- */
+.ordem {
+  display: flex;
+  gap: 14px;
 }
 
 .ordem button {
-  padding: 8px 14px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--penumbra);
+  background: none;
+  color: var(--texto-fraco);
   font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
+.ordem button:hover {
+  color: var(--claro);
+}
+
 .ordem button[aria-pressed='true'] {
-  background: var(--tela);
-  color: var(--sala);
+  color: var(--branco);
   font-weight: 700;
 }
 
-/* Botões de serviço de streaming */
 .servicos {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 12px 5px 5px;
-  border: 1px solid var(--cortina);
+  gap: 7px;
+  padding: 3px 11px 3px 3px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: var(--poltrona);
-  color: var(--tela);
+  background: var(--painel);
+  color: var(--texto);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   cursor: pointer;
 }
 
+.chip:hover {
+  color: var(--claro);
+}
+
 .chip img {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
 }
 
 .chip[aria-pressed='true'] {
-  border-color: var(--letreiro);
-  box-shadow: inset 0 0 0 1px var(--letreiro);
+  border-color: var(--verde);
+  color: var(--branco);
 }
 
+.ver-todos {
+  margin-top: 10px;
+}
+
+.grade {
+  margin-top: 20px;
+}
+
+/* Botões que parecem link: "Ler mais", "Responder", "Sair"… */
 .link-botao {
-  align-self: flex-start;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--letreiro);
+  color: var(--texto);
   font: inherit;
-  text-decoration: underline;
+  font-size: 0.8125rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* ---------- Grade de filmes ---------- */
-.grade {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* celular: 2 colunas */
-  gap: 18px 14px;
+.link-botao:hover {
+  color: var(--azul);
 }
 
-.cartao {
-  color: inherit;
-  text-decoration: none;
-}
-
-.cartao-poster {
-  width: 100%;
-  aspect-ratio: 2 / 3; /* formato de pôster */
-  object-fit: cover;
-  border-radius: var(--raio);
-  background: var(--poltrona);
-}
-
-.sem-poster {
-  display: grid;
-  place-items: center;
-  color: var(--penumbra);
-  border: 1px dashed var(--cortina);
-}
-
-.cartao:hover .cartao-poster,
-.cartao:focus-visible .cartao-poster {
-  outline: 2px solid var(--letreiro);
-  outline-offset: 2px;
-}
-
-.cartao-titulo {
-  margin: 8px 0 2px;
-  font-size: 0.98rem;
-  line-height: 1.3;
-}
-
-.cartao-detalhes {
-  display: flex;
-  gap: 10px;
-  color: var(--penumbra);
-  font-size: 0.88rem;
-}
-
-.cartao-nota {
-  color: var(--letreiro);
+.link-botao:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 /* Mensagens: carregando, vazio, erro */
 .vazio {
   grid-column: 1 / -1;
-  color: var(--penumbra);
-  padding: 24px 0;
+  margin: 0;
+  padding: 20px 0;
+  color: var(--texto-fraco);
 }
 
 .carregar-mais {
   display: block;
-  margin: 28px auto 40px;
-  padding: 12px 22px;
-  border: 1px solid var(--letreiro);
-  border-radius: var(--raio);
-  background: transparent;
-  color: var(--letreiro);
+  margin: 32px auto 0;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--painel);
+  color: var(--claro);
   font: inherit;
+  font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
+}
+
+.carregar-mais:hover {
+  background: var(--ardosia);
 }
 
 .carregar-mais:disabled {
   opacity: 0.5;
   cursor: wait;
-}
-
-/* ---------- Página de busca ---------- */
-.titulo-busca {
-  font-family: var(--fonte-letreiro);
-  font-weight: 800;
-  font-size: clamp(2rem, 8vw, 3.2rem);
-  line-height: 1;
-  margin: 24px 0 20px;
-  overflow-wrap: anywhere; /* buscas longas não estouram a tela */
 }
 
 /* ---------- Formulários (entrar, criar conta, avaliar, comentar) ---------- */
@@ -327,20 +664,34 @@ img {
 .formulario label {
   display: grid;
   gap: 6px;
-  font-weight: 700;
+  color: var(--texto);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .formulario input,
 .formulario select,
 .formulario textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--cortina);
-  border-radius: var(--raio);
-  background: var(--poltrona);
-  color: var(--tela);
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--painel);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: var(--claro);
   font: inherit;
+  font-size: 1rem;
   font-weight: 400;
+}
+
+/* Campo em uso fica claro, como no Letterboxd */
+.formulario input:focus,
+.formulario select:focus,
+.formulario textarea:focus {
+  background: var(--branco);
+  color: #223344;
+  outline: 2px solid var(--azul);
+  outline-offset: 0;
 }
 
 .formulario textarea {
@@ -350,15 +701,16 @@ img {
 
 .dica {
   margin: 0;
-  color: var(--penumbra);
-  font-size: 0.85rem;
+  color: var(--texto-fraco);
+  font-size: 0.8125rem;
   font-weight: 400;
 }
 
 /* Mensagem de erro do formulário (fica vazia até dar algo errado) */
 .form-mensagem {
   margin: 0;
-  color: var(--letreiro);
+  color: var(--laranja);
+  font-size: 0.875rem;
 }
 
 .form-mensagem:empty {
@@ -367,14 +719,20 @@ img {
 
 .botao-principal {
   justify-self: start;
-  padding: 11px 20px;
+  padding: 9px 18px;
   border: 0;
-  border-radius: var(--raio);
-  background: var(--letreiro);
-  color: var(--letreiro-escuro);
+  border-radius: 3px;
+  background: var(--verde-botao);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: var(--branco);
   font: inherit;
+  font-size: 0.9375rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.botao-principal:hover {
+  background: var(--verde-botao-forte);
 }
 
 .botao-principal:disabled {
@@ -382,81 +740,202 @@ img {
   cursor: wait;
 }
 
+/* Páginas de entrar e criar conta: uma coluna estreita no meio */
+.pagina-conta {
+  max-width: 452px; /* 420 do formulário + as margens */
+  padding-top: 48px;
+}
+
+.titulo-conta {
+  margin: 0 0 24px;
+  color: var(--branco);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
 .form-rodape {
-  margin: 24px 0 40px;
-  color: var(--penumbra);
+  margin: 28px 0 0;
+  color: var(--texto);
+  font-size: 0.9375rem;
 }
 
 /* ---------- Página do filme ---------- */
-.filme-topo {
+.pagina-filme > .vazio {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 140px var(--margem) 24px;
+}
+
+/* A imagem de cena no topo, apagando nas bordas */
+.filme-fundo {
+  position: relative;
+  max-width: 1200px;
+  height: clamp(230px, 52vw, 520px);
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.filme-fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.filme-fundo.sem-imagem {
+  height: 170px;
+}
+
+.filme-fundo.sem-imagem::after {
+  content: none;
+}
+
+/* Celular: título à esquerda e pôster pequeno à direita; o resto embaixo */
+.filme-corpo {
+  position: relative;
   display: grid;
-  gap: 20px;
-  margin-top: 16px;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  grid-template-areas:
+    'cabeca lateral'
+    'principal principal';
+  gap: 24px 16px;
+  max-width: var(--largura-max);
+  margin: -64px auto 0; /* sobe um pouco por cima da parte apagada da imagem */
+  padding: 0 var(--margem);
+}
+
+.filme-fundo.sem-imagem + .filme-corpo {
+  margin-top: 0;
+}
+
+.filme-lateral {
+  grid-area: lateral;
+  align-self: start;
+}
+
+.filme-cabeca {
+  grid-area: cabeca;
+  align-self: end;
+}
+
+.filme-principal {
+  grid-area: principal;
+  min-width: 0;
 }
 
 .filme-poster {
-  width: min(260px, 70%);
+  width: 100%;
   aspect-ratio: 2 / 3;
   object-fit: cover;
   border-radius: var(--raio);
-  background: var(--poltrona);
+  background: var(--painel);
+  box-shadow: 0 0 0 1px rgba(221, 238, 255, 0.2), 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 .filme-titulo {
-  font-family: var(--fonte-letreiro);
-  font-weight: 900;
-  font-size: clamp(2.2rem, 9vw, 4rem);
-  line-height: 0.95;
-  margin: 0 0 12px;
+  margin: 0;
+  color: var(--branco);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 5vw, 2.6rem);
+  font-variation-settings: 'opsz' 60;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* O ano ao lado do título, menor e sem serifa (como no Letterboxd) */
+.filme-ano {
+  color: var(--claro);
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: 0.55em;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .filme-detalhes {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
-  color: var(--penumbra);
+  gap: 4px 14px;
+  margin-top: 10px;
+  color: var(--texto);
+  font-size: 0.875rem;
 }
 
-.filme-nota {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--letreiro);
-  margin: 14px 0;
-}
-
-.votos {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: var(--penumbra);
+.filme-resumo {
+  display: grid;
+  gap: 24px;
 }
 
 .filme-sinopse {
-  max-width: 65ch;
+  max-width: 62ch;
   margin: 0;
+  color: var(--texto);
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
-.secao {
-  margin-top: 40px;
+/* Painel de notas: TMDB e comunidade */
+.painel-notas {
+  align-self: start;
+  padding: 0 16px;
+  border-radius: var(--raio);
+  background: var(--painel);
 }
 
-.secao h2 {
-  font-family: var(--fonte-letreiro);
-  font-weight: 800;
-  font-size: 2rem;
-  margin: 0 0 16px;
-  color: var(--letreiro);
+.painel-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 12px 0;
+}
+
+.painel-notas div .painel-linha {
+  border-top: 1px solid var(--ardosia);
+}
+
+.painel-rotulo {
+  flex-basis: 100%;
+  color: var(--texto);
+  font-size: 0.75rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.painel-nota {
+  color: var(--claro);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.votos {
+  flex-basis: 100%;
+  color: var(--texto);
+  font-size: 0.8125rem;
 }
 
 /* Onde assistir */
 .grupo h3 {
-  font-size: 1rem;
-  margin: 16px 0 8px;
+  margin: 14px 0 8px;
+  color: var(--texto-fraco);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.grupo:first-of-type h3 {
+  margin-top: 0;
 }
 
 .grupo ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -466,114 +945,153 @@ img {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px 5px 5px;
-  border: 1px solid var(--cortina);
+  padding: 3px 12px 3px 3px;
   border-radius: 999px;
-  background: var(--poltrona);
-  font-size: 0.9rem;
+  background: var(--painel);
+  color: var(--claro);
+  font-size: 0.875rem;
 }
 
 .provedor img {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
 }
 
 .indisponivel {
   margin: 0;
   padding: 14px 16px;
-  border-left: 3px solid var(--letreiro);
-  background: var(--poltrona);
+  border-radius: var(--raio);
+  background: var(--painel);
+  color: var(--texto);
 }
 
 .credito {
-  margin: 16px 0 4px;
-  color: var(--penumbra);
-  font-size: 0.85rem;
+  margin: 14px 0 4px;
+  color: var(--texto-fraco);
+  font-size: 0.8125rem;
 }
 
-/* Resenhas */
-.resenhas {
+/* ---------- Resenhas, avaliações e comentários: uma lista com avatar ---------- */
+.resenha,
+.comentario {
   display: grid;
-  gap: 16px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 0 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--painel);
 }
 
-.resenha {
-  padding: 16px;
-  border-radius: var(--raio);
-  background: var(--poltrona);
-  max-width: 75ch;
+.resenha:first-child,
+.comentarios > .comentario:first-child {
+  padding-top: 4px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ardosia);
+  box-shadow: inset 0 0 0 1px rgba(221, 238, 255, 0.2);
+  color: var(--claro);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.avatar-vazio {
+  background: var(--painel);
+}
+
+.resenha-corpo {
+  min-width: 0;
+}
+
+.resenha-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
 }
 
 .resenha-autor {
   margin: 0;
-  font-size: 1rem;
+  color: var(--claro);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+/* As estrelas verdes: o detalhe mais reconhecível do visual */
+.estrelas {
+  color: var(--verde);
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .resenha-detalhes {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  color: var(--penumbra);
-  font-size: 0.85rem;
-}
-
-.resenha-nota {
-  color: var(--letreiro);
+  gap: 4px 10px;
+  color: var(--texto-fraco);
+  font-size: 0.8125rem;
 }
 
 .etiqueta {
-  padding: 0 8px;
-  border: 1px solid var(--cortina);
-  border-radius: 999px;
+  padding: 0 7px;
+  border-radius: 3px;
+  background: var(--painel);
+  color: var(--texto);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .resenha-texto {
+  max-width: 70ch;
+  margin: 8px 0 0;
+  color: var(--texto);
+  line-height: 1.6;
   white-space: pre-line; /* mantém os parágrafos da resenha */
   overflow-wrap: anywhere; /* links longos não estouram a tela do celular */
-  margin: 10px 0 0;
 }
 
 .resenha-acoes {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px 20px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .resenha-aviso {
   margin: 8px 0 0;
-  color: var(--penumbra);
-  font-size: 0.85rem;
+  color: var(--texto-fraco);
+  font-size: 0.8125rem;
   font-style: italic;
 }
 
-.link-botao:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
-
 /* ---------- Comunidade ---------- */
-.nota-comunidade {
-  margin: -4px 0 14px;
-  font-weight: 700;
-}
-
-.secao > .dica {
-  margin: -8px 0 16px;
-}
-
 .pedir-login {
-  margin: 0;
-  font-weight: 700;
+  margin: 0 0 8px;
+  font-weight: 600;
 }
 
+/* Formulários de avaliar e comentar: um painel acima da lista */
 .form-avaliacao,
 .form-comentario {
-  max-width: 75ch;
+  max-width: none;
+  margin-bottom: 8px;
   padding: 16px;
-  border: 1px solid var(--cortina);
   border-radius: var(--raio);
+  background: var(--painel);
+}
+
+.form-avaliacao input,
+.form-avaliacao select,
+.form-avaliacao textarea,
+.form-comentario textarea {
+  background: var(--fundo);
 }
 
 /* O "portão" da Discussão: chama atenção sem assustar */
@@ -581,37 +1099,35 @@ img {
   display: grid;
   gap: 12px;
   justify-items: start;
-  max-width: 75ch;
-  padding: 18px 16px;
-  border-left: 3px solid var(--letreiro);
-  background: var(--poltrona);
+  padding: 18px 20px;
+  border-left: 3px solid var(--laranja);
+  border-radius: var(--raio);
+  background: var(--painel);
 }
 
 .aviso-spoiler p {
   margin: 0;
-  font-weight: 700;
+  color: var(--claro);
+  font-weight: 600;
 }
 
 .comentarios {
-  display: grid;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.comentario {
-  max-width: 75ch;
-  padding: 16px;
-  border-radius: var(--raio);
-  background: var(--poltrona);
+  margin-top: 16px;
 }
 
 .comentario-topo {
   margin: 0;
+  color: var(--claro);
+  font-size: 0.9375rem;
+}
+
+.comentario-topo .dica {
+  margin-left: 6px;
 }
 
 .comentario-apagado {
   margin: 0;
-  color: var(--penumbra);
+  color: var(--texto-fraco);
   font-style: italic;
 }
 
@@ -621,7 +1137,7 @@ img {
   gap: 14px;
   margin-top: 14px;
   padding-left: 14px;
-  border-left: 2px solid var(--cortina);
+  border-left: 2px solid var(--painel);
 }
 
 .resposta .resenha-texto {
@@ -634,29 +1150,29 @@ img {
 
 /* ---------- Rodapé com os créditos obrigatórios ---------- */
 .rodape {
-  margin-top: 48px;
-  border-top: 1px solid var(--cortina);
-  padding: 20px var(--margem) 28px;
-  color: var(--penumbra);
-  font-size: 0.85rem;
+  margin-top: 72px;
+  padding: 24px var(--margem) 32px;
+  background: var(--painel);
+  color: var(--texto);
+  font-size: 0.8125rem;
 }
 
 .rodape-interno {
-  max-width: var(--largura-max);
-  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 20px;
+  gap: 12px 24px;
+  max-width: calc(var(--largura-max) - 2 * var(--margem));
+  margin: 0 auto;
 }
 
 .rodape img {
-  width: 120px;
+  width: 110px;
 }
 
 .rodape p {
-  margin: 0;
   max-width: 60ch;
+  margin: 0;
 }
 
 /* Esconde visualmente, mas mantém para leitores de tela */
@@ -669,22 +1185,64 @@ img {
   white-space: nowrap;
 }
 
-/* ---------- Telas maiores ---------- */
+/* ---------- Telas médias (tablet e acima) ---------- */
 @media (min-width: 600px) {
+  .recursos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 760px) {
+  /* Cabeçalho numa linha só: nome, menu e busca */
+  .menu {
+    order: 0;
+    width: auto;
+  }
+
+  .busca {
+    flex: 0 0 170px;
+  }
+
+  .palco {
+    min-height: clamp(520px, 52vw, 640px);
+    padding-top: 0;
+  }
+
+  .palco-credito {
+    right: 24px;
+  }
+
+  .destaques-grade {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+  }
+
   .grade {
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 24px 18px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 22px 14px;
   }
 
-  /* Página do filme: pôster à esquerda, informações à direita */
-  .filme-topo {
-    grid-template-columns: 260px 1fr;
+  /* Página do filme: pôster à esquerda, todo o resto à direita */
+  .filme-corpo {
+    grid-template-columns: 210px minmax(0, 1fr);
+    grid-template-areas:
+      'lateral cabeca'
+      'lateral principal';
+    gap: 24px 40px;
+    margin-top: -120px;
+  }
+}
+
+/* ---------- Telas grandes ---------- */
+@media (min-width: 900px) {
+  .recursos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Sinopse à esquerda, painel de notas à direita */
+  .filme-resumo {
+    grid-template-columns: minmax(0, 1fr) 220px;
     gap: 32px;
-    align-items: start;
-  }
-
-  .filme-poster {
-    width: 100%;
   }
 }
 

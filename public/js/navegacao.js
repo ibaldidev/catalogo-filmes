@@ -15,6 +15,11 @@ export function linkEntrar(destino) {
   return `entrar.html?volta=${encodeURIComponent(destino)}`;
 }
 
+// Link para criar conta, também lembrando para onde voltar depois.
+export function linkCadastrar(destino) {
+  return `cadastrar.html?volta=${encodeURIComponent(destino)}`;
+}
+
 // ('/filme.html', '?id=550') → 'filme.html?id=550'. O endereço "/" é a página inicial.
 export function destinoDe(caminho, busca) {
   const pagina = caminho.split('/').pop() || 'index.html';

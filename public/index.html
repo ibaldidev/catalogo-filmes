@@ -7,37 +7,97 @@
   <meta name="description" content="Os filmes mais bem avaliados disponíveis agora nos serviços de streaming do Brasil.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
   <link rel="stylesheet" href="css/estilo.css">
   <script type="module" src="js/cabecalho.js"></script>
   <script type="module" src="js/inicio.js"></script>
 </head>
-<body>
+<!-- "com-fundo": o cabeçalho fica por cima da imagem grande do topo -->
+<body class="com-fundo">
   <header class="cabecalho">
     <a class="marca" href="index.html">Em Cartaz</a>
+    <nav class="menu" aria-label="Principal">
+      <div class="conta" id="conta"></div>
+      <a href="index.html#catalogo">Filmes</a>
+    </nav>
     <form class="busca" action="busca.html" role="search">
       <label class="so-leitor" for="campo-busca">Buscar filme</label>
-      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme…" autocomplete="off">
-      <button type="submit">Buscar</button>
+      <input id="campo-busca" name="q" type="search" placeholder="Buscar filme" autocomplete="off">
+      <button type="submit">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span class="so-leitor">Buscar</span>
+      </button>
     </form>
-    <div class="conta" id="conta"></div>
   </header>
 
-  <main class="conteudo">
-    <h1 class="letreiro">O melhor no streaming agora</h1>
-
-    <section class="controles" aria-label="Filtros">
-      <div class="ordem" role="group" aria-label="Ordenar por">
-        <button type="button" data-ordem="nota" aria-pressed="true">Mais bem avaliados</button>
-        <button type="button" data-ordem="populares" aria-pressed="false">Populares agora</button>
+  <main>
+    <!-- O "palco": a imagem de uma cena do filme mais popular, com a frase por cima -->
+    <section class="palco" aria-labelledby="titulo-palco">
+      <div class="palco-imagem" id="palco-imagem"></div>
+      <a class="palco-credito" id="palco-credito" hidden></a>
+      <div class="palco-texto">
+        <h1 class="palco-titulo" id="titulo-palco">
+          Descubra o melhor do streaming.<br>
+          Saiba onde assistir cada filme.<br>
+          Dê sua nota e discuta o final.
+        </h1>
+        <a class="botao-grande" href="cadastrar.html" data-so-visitante>Criar conta grátis</a>
+        <p class="palco-legenda">Catálogo de filmes do streaming no Brasil, com avaliações da comunidade.</p>
       </div>
-
-      <div class="servicos" id="servicos" role="group" aria-label="Serviços de streaming"></div>
-      <button type="button" class="link-botao" id="ver-todos" hidden>Ver todos os serviços</button>
     </section>
 
-    <div class="grade" id="grade" aria-live="polite"></div>
-    <button type="button" class="carregar-mais" id="carregar-mais" hidden>Carregar mais filmes</button>
+    <div class="conteudo">
+      <section class="destaques" aria-label="Populares agora">
+        <div class="destaques-grade" id="destaques"></div>
+      </section>
+
+      <!-- Só para visitantes: quem já tem conta não precisa da apresentação -->
+      <section class="secao" aria-labelledby="titulo-recursos" data-so-visitante>
+        <h2 class="titulo-secao" id="titulo-recursos">No Em Cartaz você pode…</h2>
+        <ul class="recursos">
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 5C6.5 5 2.7 9.2 1.5 12c1.2 2.8 5 7 10.5 7s9.3-4.2 10.5-7C21.3 9.2 17.5 5 12 5Z M12 7.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9Z M12 10a2 2 0 1 1 0 4a2 2 0 1 1 0-4Z"/></svg>
+            <p>Encontrar os filmes mais bem avaliados que estão nos seus serviços de streaming</p>
+          </li>
+          <li class="recurso-destaque">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2.5 14.9,8.6 21.5,9.3 16.5,13.8 17.9,20.4 12,17 6.1,20.4 7.5,13.8 2.5,9.3 9.1,8.6"/></svg>
+            <p>Dar sua nota a cada filme, de meia a cinco estrelas, e contar o que achou</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="2.4" rx="1.2"/><rect x="3" y="10.8" width="18" height="2.4" rx="1.2"/><rect x="3" y="16.6" width="11" height="2.4" rx="1.2"/></svg>
+            <p>Ler resenhas do TMDB e traduzir as que estão em inglês (no Chrome)</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z M10 8.5v6l5-3Z"/><rect x="8" y="19.4" width="8" height="1.8" rx=".9"/></svg>
+            <p>Ver em qual serviço cada filme está: na assinatura, para alugar ou para comprar</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 20 17h-9l-5 4v-4H4a1.5 1.5 0 0 1-1.5-1.5v-10A1.5 1.5 0 0 1 4 4Z"/></svg>
+            <p>Conversar sobre o final numa discussão separada, que só abre quando você pedir</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+            <p>Buscar qualquer filme pelo nome e descobrir onde assistir</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="secao" id="catalogo" aria-labelledby="titulo-catalogo">
+        <div class="cabeca-secao">
+          <h2 class="titulo-secao" id="titulo-catalogo">O melhor no streaming agora</h2>
+          <div class="ordem" role="group" aria-label="Ordenar por">
+            <button type="button" data-ordem="nota" aria-pressed="true">Mais bem avaliados</button>
+            <button type="button" data-ordem="populares" aria-pressed="false">Populares</button>
+          </div>
+        </div>
+
+        <div class="servicos" id="servicos" role="group" aria-label="Serviços de streaming"></div>
+        <button type="button" class="link-botao ver-todos" id="ver-todos" hidden>Ver todos os serviços</button>
+
+        <div class="grade" id="grade" aria-live="polite"></div>
+        <button type="button" class="carregar-mais" id="carregar-mais" hidden>Carregar mais filmes</button>
+      </section>
+    </div>
   </main>
 
   <footer class="rodape">

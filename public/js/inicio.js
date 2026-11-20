@@ -2,8 +2,12 @@
 
 import { carregarProvedores, descobrir } from './api.js';
 import { cartaoFilme, chipServico, listaVazia } from './componentes.js';
+import { urlImagem } from './formatar.js';
 
 // Elementos da página
+const areaDestaques = document.querySelector('#destaques');
+const palcoImagem = document.querySelector('#palco-imagem');
+const palcoCredito = document.querySelector('#palco-credito');
 const grade = document.querySelector('#grade');
 const botaoMais = document.querySelector('#carregar-mais');
 const areaServicos = document.querySelector('#servicos');
@@ -66,6 +70,36 @@ function recomecar() {
   carregarFilmes({ acrescentar: false });
 }
 
+// A imagem grande do topo: uma cena do filme. Ela começa invisível e aparece
+// suavemente quando termina de baixar (a classe "carregada" liga a transição no CSS).
+function mostrarFundo(filme) {
+  const imagem = new Image();
+  imagem.alt = ''; // só decoração: o nome do filme aparece no crédito ao lado
+  imagem.className = 'palco-foto';
+  imagem.addEventListener('load', () => imagem.classList.add('carregada'));
+  imagem.src = urlImagem(filme.fundo, 'w1280');
+  palcoImagem.append(imagem);
+
+  // textContent nunca vira HTML, então o título do TMDB entra com segurança.
+  palcoCredito.textContent = filme.ano ? `${filme.titulo} (${filme.ano})` : filme.titulo;
+  palcoCredito.href = `filme.html?id=${filme.id}`;
+  palcoCredito.hidden = false;
+}
+
+// Os 6 pôsteres grandes logo abaixo do topo: os filmes mais populares agora.
+// O mais popular que tiver imagem de cena vira o fundo do topo.
+async function mostrarDestaques() {
+  try {
+    const { filmes } = await descobrir({ ordem: 'populares', provedores: [], pagina: 1 });
+    areaDestaques.innerHTML = filmes.slice(0, 6).map(cartaoFilme).join('');
+    const comFundo = filmes.find((filme) => filme.fundo);
+    if (comFundo) mostrarFundo(comFundo);
+  } catch {
+    // Sem os destaques, a página continua: o catálogo logo abaixo tem a sua própria mensagem de erro.
+    areaDestaques.closest('section').hidden = true;
+  }
+}
+
 async function mostrarServicos() {
   try {
     const provedores = await carregarProvedores();
@@ -111,5 +145,6 @@ botaoMais.addEventListener('click', () => {
 });
 
 // ---------- Começo ----------
+mostrarDestaques();
 mostrarServicos();
 carregarFilmes({ acrescentar: false });
